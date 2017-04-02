@@ -143,6 +143,47 @@ GLFWwindow * Renderer::createWindow(int width, int height)
 	return m_window;
 }
 
+void Renderer::addObject(GLfloat * vertices, int vSize, GLuint* vao, bool addToScene)
+{
+	GLuint vbo;
+
+	glGenVertexArrays(1, vao);
+	glBindVertexArray(*vao);
+
+	//VBO
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, vSize * sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+
+	// Position attribute
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(GLfloat), (GLvoid*)0);
+
+	//CLEANUP
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	//m_vao.push_back(vao);
+	//m_vbo.push_back(vbo);
+
+	if (addToScene)
+	{
+		Sceneobj tmpObj;
+		tmpObj.VAO = *vao;
+		tmpObj.iCount = vSize;
+
+		Scene.push_back(tmpObj);
+	}
+}
+
+void Renderer::i_renderScene(std::vector<Sceneobj>& Scene)
+{
+	for (int i = 0; i < Scene.size(); ++i)
+	{
+
+	}
+}
+
 void glHandleError(const char* info)
 {
 	GLenum err = glGetError();

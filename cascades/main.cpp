@@ -24,6 +24,17 @@ void main(int agrc, char* argv[])
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 
+	GLfloat vertices[] = {
+		-0.5f,  0.5f, // Top-left
+		0.5f,  0.5f, // Top-right
+		0.5f, -0.5f, // Bottom-right
+		-0.5f, -0.5f  // Bottom-left
+	};
+	int verticesSize = 8;
+
+	GLuint vao;
+	renderer.addObject(vertices, verticesSize, &vao, true);
+
 	renderer.Run();
 	
 	glfwTerminate();
