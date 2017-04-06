@@ -14,14 +14,14 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include "Camera.h"
-#include "Shader.h"
+#include "ShaderManager.h"
 
 void glHandleError(const char* info = "");
 
 struct Sceneobj {
 	GLuint VAO;
 	GLsizei iCount;
-	Shader* shader;
+	size_t shader;
 	glm::vec3 color;
 	glm::vec3 position;
 	glm::vec3 origin;
@@ -51,11 +51,11 @@ public:
 
 	void Run();
 
-	GLFWwindow* createWindow(int widht, int height);
-	void addObject(GLfloat * vertices, int vSize, GLuint* vao, bool addToScene);
+	GLFWwindow* createWindow(int width, int height);
+	size_t addObjectToScene(GLfloat * vertices, int vSize, GLuint* vao);
+	Sceneobj* getObjectById(size_t id);
 
-	float dt, fps;
-	std::vector<Sceneobj> Scene;
+	ShaderManager* getShaderManager();
 
 private:
 	GLFWwindow* m_window;
@@ -63,6 +63,10 @@ private:
 	Camera m_camera;
 	glm::vec2 m_mouse;
 	bool m_debug;
+	std::vector<Sceneobj> m_scene;
+	float m_dt;
+	GLfloat m_nearPlane, m_farPlane;
 
-	void i_renderScene(std::vector<Sceneobj>& Scene);
+	ShaderManager m_shaderManager;
+	void i_renderScene(Sceneobj* Scene, size_t size);
 };

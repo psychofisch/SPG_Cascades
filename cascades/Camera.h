@@ -11,5 +11,7 @@ public:
 
 	glm::vec3 position;
 	glm::quat rotation;
+	float nearPlane;
+	float farPlane;
 };
 

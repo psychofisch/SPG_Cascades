@@ -33,7 +33,14 @@ void main(int agrc, char* argv[])
 	int verticesSize = 8;
 
 	GLuint vao;
-	renderer.addObject(vertices, verticesSize, &vao, true);
+	size_t objId = renderer.addObjectToScene(vertices, verticesSize, &vao);
+
+	ShaderManager* sM = renderer.getShaderManager();
+	size_t mainShader = sM->createNewShader();
+	sM->attachShaderToProgram(mainShader, "simple_vs.hlsl", GL_VERTEX_SHADER);
+	sM->attachShaderToProgram(mainShader, "simple_fs.hlsl", GL_FRAGMENT_SHADER);
+
+	renderer.getObjectById(objId)->shader = mainShader;
 
 	renderer.Run();
 	

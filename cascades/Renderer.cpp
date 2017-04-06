@@ -6,6 +6,9 @@ Renderer::Renderer()
 	:m_debug(true)
 {
 	glfwInit();
+
+	m_camera.nearPlane = 0.1f;
+	m_camera.farPlane = 1000.0f;
 }
 
 
@@ -28,19 +31,19 @@ void Renderer::key_callback(int key, int action)
 
 void Renderer::mouse_callback(double xpos, double ypos)
 {
-	const GLfloat sens = 0.3f;
+	/*const GLfloat sens = 0.3f;
 	glm::vec2 diff = glm::vec2(xpos, ypos) - m_mouse;
-	glm::quat yaw = glm::quat(glm::vec3(diff.y * dt * sens, 0.0f, 0.0f));
-	glm::quat pitch = glm::quat(glm::vec3(0.0f, diff.x * dt * sens, 0.0f));
+	glm::quat yaw = glm::quat(glm::vec3(diff.y * m_dt * sens, 0.0f, 0.0f));
+	glm::quat pitch = glm::quat(glm::vec3(0.0f, diff.x * m_dt * sens, 0.0f));
 	m_camera.rotation = glm::normalize(yaw * m_camera.rotation * pitch);
 	m_mouse.x = xpos;
-	m_mouse.y = ypos;
+	m_mouse.y = ypos;*/
 }
 
 void Renderer::Run()
 {
 	float lastframe = static_cast<float>(glfwGetTime());
-	dt = 0.014f;
+	m_dt = 0.014f;
 
 	while (!glfwWindowShouldClose(m_window))
 	{
@@ -48,9 +51,9 @@ void Renderer::Run()
 		glEnable(GL_DEPTH_TEST);
 		glm::mat4 m_view;
 
-		dt = static_cast<float>(glfwGetTime()) - lastframe;
+		m_dt = static_cast<float>(glfwGetTime()) - lastframe;
 		lastframe = static_cast<float>(glfwGetTime());
-		fps = 1.f / dt;
+		float fps = 1.f / m_dt;
 
 		float pi = 3.1415f;
 		float moveSpeed = 0.1f;
@@ -83,9 +86,10 @@ void Renderer::Run()
 
 		//color render
 		//glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
-		glClearColor(0.69f, 0.69f, 0.69f, 1.0f);
+		//glClearColor(0.69f, 0.69f, 0.69f, 1.0f);
+		glClearColor(0.f, 0.f, 0.f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//i_renderScene(m_scene, m_view);
+		i_renderScene(m_scene.data(), m_scene.size());
 
 		//render debug scene
 		/*if (m_debug)
@@ -143,7 +147,7 @@ GLFWwindow * Renderer::createWindow(int width, int height)
 	return m_window;
 }
 
-void Renderer::addObject(GLfloat * vertices, int vSize, GLuint* vao, bool addToScene)
+size_t Renderer::addObjectToScene(GLfloat * vertices, int vSize, GLuint* vao)
 {
 	GLuint vbo;
 
@@ -166,21 +170,35 @@ void Renderer::addObject(GLfloat * vertices, int vSize, GLuint* vao, bool addToS
 	//m_vao.push_back(vao);
 	//m_vbo.push_back(vbo);
 
-	if (addToScene)
-	{
-		Sceneobj tmpObj;
-		tmpObj.VAO = *vao;
-		tmpObj.iCount = vSize;
+	Sceneobj tmpObj;
+	tmpObj.VAO = *vao;
+	tmpObj.iCount = vSize;
 
-		Scene.push_back(tmpObj);
-	}
+	m_scene.push_back(tmpObj);
+
+	return m_scene.size() - 1;
 }
 
-void Renderer::i_renderScene(std::vector<Sceneobj>& Scene)
+Sceneobj * Renderer::getObjectById(size_t id)
 {
-	for (int i = 0; i < Scene.size(); ++i)
-	{
+	if (id >= m_scene.size())
+		return nullptr;
+	return &(m_scene[id]);
+}
 
+ShaderManager * Renderer::getShaderManager()
+{
+	return &m_shaderManager;
+}
+
+void Renderer::i_renderScene(Sceneobj* Scene, size_t size)
+{
+	m_shaderManager.UseShader(Scene[0].shader);
+	for (int i = 0; i < size; ++i)
+	{
+		glBindVertexArray(Scene[i].VAO);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, Scene[i].iCount);
+		glBindVertexArray(0);
 	}
 }
 
