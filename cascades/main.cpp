@@ -40,6 +40,8 @@ void main(int agrc, char* argv[])
 	sM->attachShaderToProgram(mainShader, "simple_vs.hlsl", GL_VERTEX_SHADER);
 	sM->attachShaderToProgram(mainShader, "simple_fs.hlsl", GL_FRAGMENT_SHADER);
 
+	renderer.mainShader = new Shader("simple_vs.hlsl", "simple_fs.hsls");
+
 	renderer.getObjectById(objId)->shader = mainShader;
 
 	renderer.Run();

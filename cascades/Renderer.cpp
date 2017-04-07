@@ -31,13 +31,13 @@ void Renderer::key_callback(int key, int action)
 
 void Renderer::mouse_callback(double xpos, double ypos)
 {
-	/*const GLfloat sens = 0.3f;
+	const GLfloat sens = 0.3f;
 	glm::vec2 diff = glm::vec2(xpos, ypos) - m_mouse;
 	glm::quat yaw = glm::quat(glm::vec3(diff.y * m_dt * sens, 0.0f, 0.0f));
 	glm::quat pitch = glm::quat(glm::vec3(0.0f, diff.x * m_dt * sens, 0.0f));
 	m_camera.rotation = glm::normalize(yaw * m_camera.rotation * pitch);
 	m_mouse.x = xpos;
-	m_mouse.y = ypos;*/
+	m_mouse.y = ypos;
 }
 
 void Renderer::Run()
@@ -193,7 +193,8 @@ ShaderManager * Renderer::getShaderManager()
 
 void Renderer::i_renderScene(Sceneobj* Scene, size_t size)
 {
-	m_shaderManager.UseShader(Scene[0].shader);
+	//m_shaderManager.UseShader(Scene[0].shader);
+	mainShader->Use();
 	for (int i = 0; i < size; ++i)
 	{
 		glBindVertexArray(Scene[i].VAO);

@@ -57,6 +57,9 @@ public:
 
 	ShaderManager* getShaderManager();
 
+	//DEBUG
+	Shader* mainShader;
+
 private:
 	GLFWwindow* m_window;
 	glm::ivec2 m_size;

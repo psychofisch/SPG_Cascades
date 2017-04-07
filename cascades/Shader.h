@@ -12,7 +12,7 @@ class Shader
 public:
 	Shader();
 
-	//Shader(const GLchar* vertexPath, const GLchar* fragmentPath);
+	Shader(const GLchar* vertexPath, const GLchar* fragmentPath);
 	GLuint getGLProgramID(size_t index);
 	void AttachShaderToProgram(const char* path, int ShaderType);
 	void Use();
