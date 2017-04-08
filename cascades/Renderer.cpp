@@ -5,8 +5,6 @@
 Renderer::Renderer()
 	:m_debug(true)
 {
-	glfwInit();
-
 	m_camera.nearPlane = 0.1f;
 	m_camera.farPlane = 1000.0f;
 }
@@ -102,15 +100,19 @@ void Renderer::Run()
 		//glBindFramebuffer(GL_READ_FRAMEBUFFER, m_framebuffer);
 		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		//glBlitFramebuffer(0, 0, m_size.x, m_size.y, 0, 0, m_size.x, m_size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-		glHandleError("post swap buffers");
-
+	
 		//swap buffers
 		glfwSwapBuffers(m_window);
+
+		glHandleError("post swap buffers");
 	}
 }
 
 GLFWwindow * Renderer::createWindow(int width, int height)
 {
+	m_size = glm::vec2(width, height);
+
+	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -124,9 +126,9 @@ GLFWwindow * Renderer::createWindow(int width, int height)
 		return nullptr;
 	}
 	glfwMakeContextCurrent(m_window);
-	glGetError();
 
 	glewExperimental = GL_TRUE;
+	glewInit();
 	if (glewInit() != GLEW_OK)
 	{
 		std::cout << "Failed to initialize GLEW" << std::endl;
@@ -140,7 +142,7 @@ GLFWwindow * Renderer::createWindow(int width, int height)
 
 	glEnable(GL_DEPTH_TEST);
 
-	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	//i_generateNewFrameBuffer();
 
@@ -161,7 +163,7 @@ size_t Renderer::addObjectToScene(GLfloat * vertices, int vSize, GLuint* vao)
 
 	// Position attribute
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
 
 	//CLEANUP
 	glBindVertexArray(0);
@@ -191,16 +193,22 @@ ShaderManager * Renderer::getShaderManager()
 	return &m_shaderManager;
 }
 
-void Renderer::i_renderScene(Sceneobj* Scene, size_t size)
+void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 {
-	//m_shaderManager.UseShader(Scene[0].shader);
-	mainShader->Use();
+	m_shaderManager.UseShader(scene[0].shader);
+	//glUniformMatrix4fv(glGetUniformLocation(mainShader->getGLProgramID(), "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
+	
 	for (int i = 0; i < size; ++i)
 	{
-		glBindVertexArray(Scene[i].VAO);
-		glDrawArrays(GL_TRIANGLE_FAN, 0, Scene[i].iCount);
+		glBindVertexArray(scene[i].VAO);
+		glDrawArrays(GL_POINTS, 0, 4);
 		glBindVertexArray(0);
 	}
+}
+
+void Renderer::setPerspective(float fovy, float aspect, float near, float far)
+{
+	m_projection = glm::perspective(fovy, aspect, near, far);
 }
 
 void glHandleError(const char* info)

@@ -1,10 +1,6 @@
-#define GLEW_STATIC
+//#define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
 
@@ -24,6 +20,8 @@ void main(int agrc, char* argv[])
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 
+	renderer.setPerspective(70.0f, (GLfloat)1280 / (GLfloat)720, 0.1f, 500.0f);
+
 	GLfloat vertices[] = {
 		-0.5f,  0.5f, // Top-left
 		0.5f,  0.5f, // Top-right
@@ -39,8 +37,7 @@ void main(int agrc, char* argv[])
 	size_t mainShader = sM->createNewShader();
 	sM->attachShaderToProgram(mainShader, "simple_vs.hlsl", GL_VERTEX_SHADER);
 	sM->attachShaderToProgram(mainShader, "simple_fs.hlsl", GL_FRAGMENT_SHADER);
-
-	renderer.mainShader = new Shader("simple_vs.hlsl", "simple_fs.hsls");
+	sM->attachShaderToProgram(mainShader, "simple_gs.hlsl", GL_GEOMETRY_SHADER);
 
 	renderer.getObjectById(objId)->shader = mainShader;
 

@@ -16,7 +16,7 @@
 #include "Camera.h"
 #include "ShaderManager.h"
 
-void glHandleError(const char* info = "");
+void glHandleError(const char* info);
 
 struct Sceneobj {
 	GLuint VAO;
@@ -54,11 +54,9 @@ public:
 	GLFWwindow* createWindow(int width, int height);
 	size_t addObjectToScene(GLfloat * vertices, int vSize, GLuint* vao);
 	Sceneobj* getObjectById(size_t id);
+	void Renderer::setPerspective(float fovy, float aspect, float near, float far);
 
 	ShaderManager* getShaderManager();
-
-	//DEBUG
-	Shader* mainShader;
 
 private:
 	GLFWwindow* m_window;
@@ -69,6 +67,7 @@ private:
 	std::vector<Sceneobj> m_scene;
 	float m_dt;
 	GLfloat m_nearPlane, m_farPlane;
+	glm::mat4 m_projection;
 
 	ShaderManager m_shaderManager;
 	void i_renderScene(Sceneobj* Scene, size_t size);
