@@ -27,3 +27,8 @@ void ShaderManager::UseShader(size_t id)
 {
 	m_shaders[id]->Use();
 }
+
+GLuint ShaderManager::getGLIdById(size_t id)
+{
+	return m_shaders[id]->getGLProgramID();
+}

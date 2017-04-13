@@ -20,6 +20,10 @@ void Renderer::key_callback(int key, int action)
 	{
 		switch (key)
 		{
+		case GLFW_KEY_H:
+			std::cout << "cameraPos: " << m_camera.position.x << "|" << m_camera.position.y << "|" << m_camera.position.z << "\n";
+			std::cout << "cameraRot: " << m_camera.rotation.x << "|" << m_camera.rotation.y << "|" << m_camera.rotation.z << "\n";
+			break;
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
 			break;
@@ -47,12 +51,12 @@ void Renderer::Run()
 	{
 		glGetError();
 		glEnable(GL_DEPTH_TEST);
-		glm::mat4 m_view;
 
 		m_dt = static_cast<float>(glfwGetTime()) - lastframe;
 		lastframe = static_cast<float>(glfwGetTime());
 		float fps = 1.f / m_dt;
 
+		m_view = glm::mat4();
 		float pi = 3.1415f;
 		float moveSpeed = 0.1f;
 		glm::vec3 forwardVec(0, 0, moveSpeed),
@@ -72,7 +76,7 @@ void Renderer::Run()
 		else if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
 			m_camera.position += sideVec * m_camera.rotation;
 
-		glm::mat4 translate = glm::mat4(1.0f);
+		//glm::mat4 translate = glm::mat4(1.0f);
 		m_view = glm::translate(m_view, -m_camera.position);
 		m_view = glm::mat4_cast(m_camera.rotation) * m_view;
 
@@ -196,7 +200,8 @@ ShaderManager * Renderer::getShaderManager()
 void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 {
 	m_shaderManager.UseShader(scene[0].shader);
-	//glUniformMatrix4fv(glGetUniformLocation(mainShader->getGLProgramID(), "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
+	glUniformMatrix4fv(glGetUniformLocation(m_shaderManager.getGLIdById(scene[0].shader), "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
+	glUniformMatrix4fv(glGetUniformLocation(m_shaderManager.getGLIdById(scene[0].shader), "view"), 1, GL_FALSE, glm::value_ptr(m_view));
 	
 	for (int i = 0; i < size; ++i)
 	{

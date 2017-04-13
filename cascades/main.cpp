@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <ctime>
 #include <iostream>
 
 #include "Renderer.h"
@@ -42,8 +43,9 @@ void main(int agrc, char* argv[])
 
 	renderer.getObjectById(objId)->shader = mainShader;
 
-	TerrainCreator terrain(16, 16, 16);
-	terrain.createTerrain(123, 1);
+	TerrainCreator terrain(16, 16, 4);
+	int t = time(NULL);
+	terrain.createTerrain(t, 1);
 
 	renderer.Run();
 	

@@ -1,14 +1,19 @@
 #pragma once
 
 #include <climits>
-#include "RNGesus.h"
+#include <iostream>
+
 #include <glm/glm.hpp>
+
+#include "RNGesus.h"
+
+typedef uint32_t uint;
 
 class TerrainCreator
 {
 public:
 	struct vec3i {
-		int x, y, z;
+		uint x, y, z;
 
 		vec3i(){}
 		vec3i(int px, int py, int pz)

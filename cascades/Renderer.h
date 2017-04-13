@@ -69,6 +69,7 @@ private:
 	float m_dt;
 	GLfloat m_nearPlane, m_farPlane;
 	glm::mat4 m_projection;
+	glm::mat4 m_view;
 
 	ShaderManager m_shaderManager;
 	void i_renderScene(Sceneobj* Scene, size_t size);

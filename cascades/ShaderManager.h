@@ -1,6 +1,10 @@
 #pragma once
 
 #include <vector>
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include "Shader.h"
 
 class ShaderManager
@@ -12,6 +16,7 @@ public:
 	size_t createNewShader();
 	void attachShaderToProgram(size_t Shader, const char* Path, int ShaderType);
 	void UseShader(size_t id);
+	GLuint getGLIdById(size_t id);
 
 private:
 	std::vector<Shader*> m_shaders;

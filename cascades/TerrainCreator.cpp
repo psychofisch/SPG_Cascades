@@ -25,11 +25,29 @@ float* TerrainCreator::createTerrain(int seed, int iterations)
 {
 	RNGesus rng(seed, seed * 13, seed * 19);
 
-	int stepLength = 16;
-
-	for (size_t i = 0; i < m_size; i += stepLength)
+	//blobs
 	{
-		m_terrain[i] = glm::clamp((rng.GetNumber() / (ULONG_MAX + 1.0) + 0.5) * 4999 , 0., 1.0);
+		glm::vec3 pillars[3];
+		pillars[0] = glm::vec3(m_dimension.x * rng.getZeroToOne(), m_dimension.y * rng.getZeroToOne(), m_dimension.z * rng.getZeroToOne());
+		for (uint z = 0; z < m_dimension.z; ++z)
+		{
+			for (uint y = 0; y < m_dimension.y; ++y)
+			{
+				for (uint x = 0; x < m_dimension.x; ++x)
+				{
+					uint pos = x + y*m_dimension.x + z*m_dimension.y;
+					glm::vec3 tmpVec(x, y, z);
+					tmpVec -= pillars[0];
+					m_terrain[pos] = 1.0 / glm::length(tmpVec);
+					if ( m_terrain[pos] > 0.5f)
+						std::cout << "#";
+					else
+						std::cout << " ";
+				}
+				std::cout << std::endl;
+			}
+			std::cout << std::endl;
+		}
 	}
 
 	return m_terrain;

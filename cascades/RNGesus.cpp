@@ -20,3 +20,8 @@ unsigned long RNGesus::GetNumber()
 
 	return z;
 }
+
+float RNGesus::getZeroToOne()
+{
+	return static_cast<float>(GetNumber()) / (ULONG_MAX + 1.0f);
+}
