@@ -1,4 +1,9 @@
 #pragma once
+
+#include <climits>
+#include "RNGesus.h"
+#include <glm/glm.hpp>
+
 class TerrainCreator
 {
 public:
@@ -25,9 +30,12 @@ public:
 	float* getTerrainData();
 	float getTerrainDataAt(vec3i position);
 
+	float* createTerrain(int seed, int iterations);
+
 private:
 	Mode m_mode;
 	float* m_terrain;
 	vec3i m_dimension;
+	size_t m_size;
 };
 

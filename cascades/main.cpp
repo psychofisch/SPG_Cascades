@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "Renderer.h"
+#include "TerrainCreator.h"
 
 Renderer* global_engine_ptr = nullptr;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -40,6 +41,9 @@ void main(int agrc, char* argv[])
 	sM->attachShaderToProgram(mainShader, "simple_gs.hlsl", GL_GEOMETRY_SHADER);
 
 	renderer.getObjectById(objId)->shader = mainShader;
+
+	TerrainCreator terrain(16, 16, 16);
+	terrain.createTerrain(123, 1);
 
 	renderer.Run();
 	

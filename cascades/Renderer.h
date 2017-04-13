@@ -15,6 +15,7 @@
 
 #include "Camera.h"
 #include "ShaderManager.h"
+#include "TerrainCreator.h"
 
 void glHandleError(const char* info);
 
