@@ -167,7 +167,7 @@ size_t Renderer::addObjectToScene(GLfloat * vertices, int vSize, GLuint* vao)
 
 	// Position attribute
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
 	//CLEANUP
 	glBindVertexArray(0);
@@ -202,11 +202,11 @@ void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 	m_shaderManager.UseShader(scene[0].shader);
 	glUniformMatrix4fv(glGetUniformLocation(m_shaderManager.getGLIdById(scene[0].shader), "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
 	glUniformMatrix4fv(glGetUniformLocation(m_shaderManager.getGLIdById(scene[0].shader), "view"), 1, GL_FALSE, glm::value_ptr(m_view));
-	
+
 	for (int i = 0; i < size; ++i)
 	{
 		glBindVertexArray(scene[i].VAO);
-		glDrawArrays(GL_POINTS, 0, 4);
+		glDrawArrays(GL_POINTS, 0, scene[i].iCount);
 		glBindVertexArray(0);
 	}
 }

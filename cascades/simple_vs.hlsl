@@ -1,17 +1,15 @@
 #version 330 core
-layout(location = 0) in vec2 position;
+layout(location = 0) in vec3 position;
 
 uniform mat4 projection;
 uniform mat4 view;
 
 out vData{
-	mat4 p;
-	mat4 v;
+	mat4 pv;
 } vDataOut;
 
 void main()
 {
-	gl_Position = projection * view * vec4(position.x, position.y, -5.0f, 1.0f);
-	vDataOut.p = projection;
-	vDataOut.v = view;
+	vDataOut.pv = projection * view;
+	gl_Position = vDataOut.pv * vec4(position.x, position.y, position.z, 1.0f);
 }

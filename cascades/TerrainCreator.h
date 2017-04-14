@@ -3,6 +3,9 @@
 #include <climits>
 #include <iostream>
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
 
 #include "RNGesus.h"
@@ -34,6 +37,8 @@ public:
 
 	float* getTerrainData();
 	float getTerrainDataAt(vec3i position);
+	int getNumberOfVertices(bool cube = false);
+	void getVertices(GLfloat* verticesOut, bool cube = false);
 
 	float* createTerrain(int seed, int iterations);
 
