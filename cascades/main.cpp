@@ -32,16 +32,23 @@ void main(int agrc, char* argv[])
 	//};
 	//int vSize = 12;
 
-	TerrainCreator terrain(16, 16, 32);
+	TerrainCreator terrain(32, 64, 32);
 	int t = time(NULL);
 	terrain.createTerrain(t, 1);
 
-	int vSize = terrain.getNumberOfVertices(false);
+	int vSize = terrain.getNumberOfVertices(true);
 	GLfloat* vData = new GLfloat[vSize];
-	terrain.getVertices(vData, false);
+	terrain.getVertices(vData, true);
 
 	GLuint vao;
 	size_t objId = renderer.addObjectToScene(vData, vSize, &vao);
+
+	GLuint densityTexture;
+	glGenTextures(1, &densityTexture);
+	glBindTexture(GL_TEXTURE_3D, densityTexture);
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 32, 64, 32, 0, GL_RED, GL_FLOAT, terrain.getTerrainData());
+	glHandleError("post texture");
+	glBindTexture(GL_TEXTURE_3D, 0);
 
 	ShaderManager* sM = renderer.getShaderManager();
 	size_t mainShader = sM->createNewShader();
@@ -50,7 +57,8 @@ void main(int agrc, char* argv[])
 	sM->attachShaderToProgram(mainShader, "simple_gs.hlsl", GL_GEOMETRY_SHADER);
 
 	renderer.getObjectById(objId)->shader = mainShader;
-	renderer.getObjectById(objId)->iCount = vSize/3;
+	renderer.getObjectById(objId)->iCount = vSize / 3;
+	renderer.getObjectById(objId)->texture = densityTexture;
 
 	renderer.Run();
 	

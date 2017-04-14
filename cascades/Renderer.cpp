@@ -7,6 +7,7 @@ Renderer::Renderer()
 {
 	m_camera.nearPlane = 0.1f;
 	m_camera.farPlane = 1000.0f;
+	m_camera.position = glm::vec3(-14, 10, 28);
 }
 
 
@@ -58,7 +59,7 @@ void Renderer::Run()
 
 		m_view = glm::mat4();
 		float pi = 3.1415f;
-		float moveSpeed = 0.1f;
+		float moveSpeed = 1.1f;
 		glm::vec3 forwardVec(0, 0, moveSpeed),
 			sideVec(moveSpeed, 0, 0);
 
@@ -200,11 +201,16 @@ ShaderManager * Renderer::getShaderManager()
 void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 {
 	m_shaderManager.UseShader(scene[0].shader);
-	glUniformMatrix4fv(glGetUniformLocation(m_shaderManager.getGLIdById(scene[0].shader), "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
-	glUniformMatrix4fv(glGetUniformLocation(m_shaderManager.getGLIdById(scene[0].shader), "view"), 1, GL_FALSE, glm::value_ptr(m_view));
+	GLuint shaderId = m_shaderManager.getGLIdById(scene[0].shader);
+	glUniformMatrix4fv(glGetUniformLocation(shaderId, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
+	glUniformMatrix4fv(glGetUniformLocation(shaderId, "view"), 1, GL_FALSE, glm::value_ptr(m_view));
 
 	for (int i = 0; i < size; ++i)
 	{
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_3D, scene[i].texture);
+		glUniform1i(glGetUniformLocation(shaderId, "densityMap"), 0);
+
 		glBindVertexArray(scene[i].VAO);
 		glDrawArrays(GL_POINTS, 0, scene[i].iCount);
 		glBindVertexArray(0);

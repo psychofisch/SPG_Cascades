@@ -52,8 +52,8 @@ void TerrainCreator::getVertices(GLfloat* verticesOut, bool cube)
 				if (cube || m_terrain[pos] == 1.0f)
 				{
 					verticesOut[vCount] = x - (m_dimension.x * 0.5f);
-					verticesOut[vCount + 1] = z - (m_dimension.z * 0.5f);
-					verticesOut[vCount + 2] = y - (m_dimension.y * 0.5f);
+					verticesOut[vCount + 1] = y - (m_dimension.y * 0.5f);
+					verticesOut[vCount + 2] = z - (m_dimension.z * 0.5f);
 					vCount += 3;
 				}
 			}
@@ -64,6 +64,8 @@ void TerrainCreator::getVertices(GLfloat* verticesOut, bool cube)
 float* TerrainCreator::createTerrain(int seed, int iterations)
 {
 	RNGesus rng(seed, seed * 13, seed * 19);
+
+	double diagonal = glm::sqrt(glm::pow(m_dimension.x, 2) + glm::pow(m_dimension.z, 2) + glm::pow(m_dimension.y, 2));
 
 	//blobs
 	{
@@ -84,24 +86,24 @@ float* TerrainCreator::createTerrain(int seed, int iterations)
 					pillarVec[0] = tmpVec - pillars[0];
 					pillarVec[1] = tmpVec - pillars[1];
 					pillarVec[2] = tmpVec - pillars[2];
-					float f = 1.0 / glm::length(pillarVec[0]);
-					f += 1.0 / glm::length(pillarVec[1]);
-					f += 1.0 / glm::length(pillarVec[2]);
+					float f = diagonal / glm::length(pillarVec[0]);
+					f += diagonal / glm::length(pillarVec[1]);
+					f += diagonal / glm::length(pillarVec[2]);
 					f *= 0.3f;
-					if (f > 0.25f)
+					if (f > 4.f)
 					{
 						m_terrain[pos] = 1.0f;
-						std::cout << "#";
+						//std::cout << "#";
 					}
 					else
 					{
 						m_terrain[pos] = 0.0f;
-						std::cout << " ";
+						//std::cout << " ";
 					}
 				}
-				std::cout << std::endl;
+				//std::cout << std::endl;
 			}
-			std::cout << std::endl;
+			//std::cout << std::endl;
 		}
 	}
 

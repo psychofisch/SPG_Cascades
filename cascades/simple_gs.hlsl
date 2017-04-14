@@ -1,10 +1,15 @@
 #version 330 core
 layout(points) in;
-layout(triangle_strip, max_vertices = 5) out;
+//layout(triangle_strip, max_vertices = 5) out;
+layout(points, max_vertices = 1) out;
+
+uniform sampler3D densityMap;
 
 in vData{
 	mat4 pv;
 } vDataIn[];
+
+out vec4 gsColor;
 
 void build_quad(vec4 position)
 {
@@ -20,5 +25,10 @@ void build_quad(vec4 position)
 }
 
 void main() {
-	build_quad(gl_in[0].gl_Position);
+	//build_quad(gl_in[0].gl_Position);
+	gl_Position = gl_in[0].gl_Position;
+	EmitVertex();
+	EndPrimitive();
+
+	gsColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }
