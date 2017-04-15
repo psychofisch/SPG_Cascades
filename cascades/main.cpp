@@ -46,6 +46,10 @@ void main(int agrc, char* argv[])
 	GLuint densityTexture;
 	glGenTextures(1, &densityTexture);
 	glBindTexture(GL_TEXTURE_3D, densityTexture);
+	//glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	//glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 32, 64, 32, 0, GL_RED, GL_FLOAT, terrain.getTerrainData());
 	glHandleError("post texture");
 	glBindTexture(GL_TEXTURE_3D, 0);

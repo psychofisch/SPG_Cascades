@@ -1,9 +1,13 @@
 #version 330 core
-out vec4 color;
+out vec4 fragColor;
 
-in vec4 gsColor;
+in gsData{
+	vec3 position;
+	vec4 color;
+} gsDataIn;
 
 void main()
 {
-	color = gsColor;
+	//fragColor = gsDataIn.color;
+	fragColor = vec4(1.f, 0.0f, 0.0f, 1.0f);
 }
