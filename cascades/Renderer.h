@@ -16,6 +16,7 @@
 #include "Camera.h"
 #include "ShaderManager.h"
 #include "TerrainCreator.h"
+#include "vertTable.h"
 
 void glHandleError(const char* info);
 
@@ -72,7 +73,8 @@ private:
 	glm::mat4 m_projection;
 	glm::mat4 m_view;
 	TerrainCreator* m_terrainCreator;
-	GLuint m_terrainTexture;
+	GLuint m_terrainTexture,
+			m_edgeTable;
 
 	ShaderManager m_shaderManager;
 	void i_renderScene(Sceneobj* Scene, size_t size);

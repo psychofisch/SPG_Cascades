@@ -5,13 +5,15 @@ uniform mat4 projection;
 uniform mat4 view;
 
 out vData{
-	mat4 pv;
+	mat4 p;
+	mat4 v;
 	vec3 position;
 } vDataOut;
 
 void main()
 {
-	vDataOut.pv = projection * view;
+	vDataOut.p = projection;
+	vDataOut.v = view;
 	vDataOut.position = position;
-	gl_Position = vDataOut.pv * vec4(position.x, position.y, position.z, 1.0f);
+	gl_Position = projection * view * vec4(position.x, position.y, position.z, 1.0f);
 }

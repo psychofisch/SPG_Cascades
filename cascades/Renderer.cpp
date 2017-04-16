@@ -26,6 +26,7 @@ void Renderer::key_callback(int key, int action)
 			std::cout << "cameraRot: " << m_camera.rotation.x << "|" << m_camera.rotation.y << "|" << m_camera.rotation.z << "\n";
 			break;
 		case GLFW_KEY_T:
+			
 			m_terrainCreator->createTerrain();
 			glBindTexture(GL_TEXTURE_3D, m_terrainTexture);
 			glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, m_terrainCreator->getDimensions().x, m_terrainCreator->getDimensions().y, m_terrainCreator->getDimensions().z, 0, GL_RED, GL_FLOAT, m_terrainCreator->getTerrainData());
@@ -53,6 +54,23 @@ void Renderer::Run()
 {
 	float lastframe = static_cast<float>(glfwGetTime());
 	m_dt = 0.014f;
+
+	/*glGenBuffers(1, &m_edgeTable);
+	glBindBuffer(GL_UNIFORM_BUFFER, m_edgeTable);
+	glBufferData(GL_UNIFORM_BUFFER, 256 * 16 * sizeof(int), vertTable, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	glHandleError("vertTable");*/
+	glHandleError("pre edgeTable");
+
+	glGenTextures(1, &m_edgeTable);
+	glBindTexture(GL_TEXTURE_2D, m_edgeTable);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 256, 16, 0, GL_RED_INTEGER, GL_INT, vertTable);
+	glHandleError("post edgeTable");
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	while (!glfwWindowShouldClose(m_window))
 	{
@@ -222,11 +240,15 @@ void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 	glUniformMatrix4fv(glGetUniformLocation(shaderId, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
 	glUniformMatrix4fv(glGetUniformLocation(shaderId, "view"), 1, GL_FALSE, glm::value_ptr(m_view));
 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_edgeTable);
+	glUniform1i(glGetUniformLocation(shaderId, "vertTable"), 0);
+
 	for (int i = 0; i < size; ++i)
 	{
-		glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_3D, scene[i].texture);
-		glUniform1i(glGetUniformLocation(shaderId, "densityMap"), 0);
+		glUniform1i(glGetUniformLocation(shaderId, "densityMap"), 1);
 
 		glBindVertexArray(scene[i].VAO);
 		glDrawArrays(GL_POINTS, 0, scene[i].iCount);
