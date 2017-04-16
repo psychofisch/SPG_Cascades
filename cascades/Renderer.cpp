@@ -68,7 +68,7 @@ void Renderer::Run()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 256, 16, 0, GL_RED_INTEGER, GL_INT, vertTable);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 16, 256, 0, GL_RED_INTEGER, GL_INT, vertTable);
 	glHandleError("post edgeTable");
 	glBindTexture(GL_TEXTURE_2D, 0);
 

@@ -1,7 +1,7 @@
 #version 330 core
 layout(points) in;
-//layout(triangle_strip, max_vertices = 12) out;
-layout(points, max_vertices = 64) out;
+layout(triangle_strip, max_vertices = 12) out;
+//layout(points, max_vertices = 64) out;
 
 uniform isampler2D vertTable;
 uniform sampler3D densityMap;
@@ -50,15 +50,15 @@ void buildTriangle(vec3 p0, vec3 p1, vec3 p2)
 {
 	mat4 pv = vDataIn[0].p * vDataIn[0].v;
 
-	gsDataOut.color = vec4(1.0f, 0, 0, 1.0f);
+	//gsDataOut.color = vec4(1.0f, 0, 0, 1.0f);
 	gl_Position = gl_in[0].gl_Position + pv * vec4(p0, 1.0f);
 	EmitVertex();
 
-	gsDataOut.color = vec4(0, 1.0f, 0, 1.0f);
+	//gsDataOut.color = vec4(0, 1.0f, 0, 1.0f);
 	gl_Position = gl_in[0].gl_Position + pv * vec4(p1, 1.0f);
 	EmitVertex();
 
-	gsDataOut.color = vec4(0, 0, 1.0f, 1.0f);
+	//gsDataOut.color = vec4(0, 0, 1.0f, 1.0f);
 	gl_Position = gl_in[0].gl_Position + pv * vec4(p2, 1.0f);
 	EmitVertex();
 
@@ -92,18 +92,27 @@ void main() {
 
 	for (int i = 0; i < 16; i += 3)
 	{
-		if (texture(vertTable, vec2(lookupIndex, i)).r != -1)
+		if (texture(vertTable, vec2(float(i) / 16, 1.0 - (float(lookupIndex) / 255))).r != -1)
 		{
 			int points[3];
-			points[0] = texture(vertTable, vec2(lookupIndex / 255, (i + 0) / 16)).r;
-			points[1] = texture(vertTable, vec2(lookupIndex / 255, (i + 1) / 16)).r;
-			points[2] = texture(vertTable, vec2(lookupIndex / 255, (i + 2) / 16)).r;
-			gsDataOut.color = vec4(1.0f, 0, 0, 1.0f);
-			/*gl_Position = gl_in[0].gl_Position;
+			points[0] = texture(vertTable, vec2(float(i) / 16, 1.0 - (float(lookupIndex) / 255))).r;
+			points[1] = texture(vertTable, vec2(float(i+1) / 16, 1.0 - (float(lookupIndex) / 255))).r;
+			points[2] = texture(vertTable, vec2(float(i+2) / 16, 1.0 - (float(lookupIndex) / 255))).r;
+
+			/*gsDataOut.color = vec4(1.0f, 0, 0, 1.0f);
+			gl_Position = gl_in[0].gl_Position;
 			EmitVertex();
 			EndPrimitive();*/
-			buildTriangle(edges[points[0]], edges[points[1]], edges[points[2]]);
+			buildTriangle(edges[points[0]] * 2.0f, edges[points[1]] * 2.0f, edges[points[2]] * 2.0f);
 		}
+		/*else
+		{
+			gsDataOut.color = vec4(0, 1.0f, 0, 1.0f);
+			gl_Position = gl_in[0].gl_Position;
+			EmitVertex();
+			EndPrimitive();
+			break;
+		}*/
 	}
 
 	//if (lookupIndex == 0 && lookupIndex < 255)
