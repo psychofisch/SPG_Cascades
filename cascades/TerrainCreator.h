@@ -32,20 +32,22 @@ public:
 		MODE_3D
 	};
 
-	TerrainCreator(int width, int height, int depth);
+	TerrainCreator(int width, int height, int depth, int seed);
 	~TerrainCreator();
 
 	float* getTerrainData();
 	float getTerrainDataAt(vec3i position);
 	int getNumberOfVertices(bool cube = false);
 	void getVertices(GLfloat* verticesOut, bool cube = false);
+	vec3i getDimensions();
 
-	float* createTerrain(int seed, int iterations);
+	float* createTerrain();
 
 private:
 	Mode m_mode;
 	float* m_terrain;
 	vec3i m_dimension;
 	size_t m_size;
+	RNGesus* m_rng;
 };
 

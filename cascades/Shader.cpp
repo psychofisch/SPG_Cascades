@@ -141,6 +141,8 @@ void Shader::AttachShaderToProgram(const char* path, int ShaderType)
 	{
 		glGetShaderInfoLog(shader, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
+		std::cin.ignore();
+		exit(13);
 	}
 
 	// Shader Program

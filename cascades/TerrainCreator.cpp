@@ -1,14 +1,17 @@
 #include "TerrainCreator.h"
 
-TerrainCreator::TerrainCreator(int width, int height, int depth)
+TerrainCreator::TerrainCreator(int width, int height, int depth, int seed)
 {
 	m_size = width * height * depth;
 	m_terrain = new float[m_size]{0.0f};
 	m_dimension = vec3i(width, height, depth);
+	m_rng = new RNGesus(seed, seed * 13, seed * 19);
 }
 
 TerrainCreator::~TerrainCreator()
 {
+	delete m_rng;
+	delete[] m_terrain;
 }
 
 float* TerrainCreator::getTerrainData()
@@ -42,11 +45,11 @@ void TerrainCreator::getVertices(GLfloat* verticesOut, bool cube)
 {
 	int vCount = 0;
 
-	for (uint z = 0; z < m_dimension.z; ++z)
+	for (uint z = 0; z < m_dimension.z; z += 2)
 	{
-		for (uint y = 0; y < m_dimension.y; ++y)
+		for (uint y = 0; y < m_dimension.y; y += 2)
 		{
-			for (uint x = 0; x < m_dimension.x; ++x)
+			for (uint x = 0; x < m_dimension.x; x += 2)
 			{
 				uint pos = x + y*m_dimension.x + z*(m_dimension.y * m_dimension.x);
 				if (cube || m_terrain[pos] == 1.0f)
@@ -61,18 +64,21 @@ void TerrainCreator::getVertices(GLfloat* verticesOut, bool cube)
 	}
 }
 
-float* TerrainCreator::createTerrain(int seed, int iterations)
+TerrainCreator::vec3i TerrainCreator::getDimensions()
 {
-	RNGesus rng(seed, seed * 13, seed * 19);
+	return m_dimension;
+}
 
+float* TerrainCreator::createTerrain()
+{
 	double diagonal = glm::sqrt(glm::pow(m_dimension.x, 2) + glm::pow(m_dimension.z, 2) + glm::pow(m_dimension.y, 2));
 
 	//blobs
 	{
 		glm::vec3 pillars[3];
-		pillars[0] = glm::vec3(m_dimension.x * rng.getZeroToOne(), m_dimension.y * rng.getZeroToOne(), m_dimension.z * rng.getZeroToOne());
-		pillars[1] = glm::vec3(m_dimension.x * rng.getZeroToOne(), m_dimension.y * rng.getZeroToOne(), m_dimension.z * rng.getZeroToOne());
-		pillars[2] = glm::vec3(m_dimension.x * rng.getZeroToOne(), m_dimension.y * rng.getZeroToOne(), m_dimension.z * rng.getZeroToOne());
+		pillars[0] = glm::vec3(m_dimension.x * m_rng->getZeroToOne(), m_dimension.y * m_rng->getZeroToOne(), m_dimension.z * m_rng->getZeroToOne());
+		pillars[1] = glm::vec3(m_dimension.x * m_rng->getZeroToOne(), m_dimension.y * m_rng->getZeroToOne(), m_dimension.z * m_rng->getZeroToOne());
+		pillars[2] = glm::vec3(m_dimension.x * m_rng->getZeroToOne(), m_dimension.y * m_rng->getZeroToOne(), m_dimension.z * m_rng->getZeroToOne());
 		
 		for (uint z = 0; z < m_dimension.z; ++z)
 		{

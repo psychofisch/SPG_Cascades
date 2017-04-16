@@ -25,6 +25,12 @@ void Renderer::key_callback(int key, int action)
 			std::cout << "cameraPos: " << m_camera.position.x << "|" << m_camera.position.y << "|" << m_camera.position.z << "\n";
 			std::cout << "cameraRot: " << m_camera.rotation.x << "|" << m_camera.rotation.y << "|" << m_camera.rotation.z << "\n";
 			break;
+		case GLFW_KEY_T:
+			m_terrainCreator->createTerrain();
+			glBindTexture(GL_TEXTURE_3D, m_terrainTexture);
+			glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, m_terrainCreator->getDimensions().x, m_terrainCreator->getDimensions().y, m_terrainCreator->getDimensions().z, 0, GL_RED, GL_FLOAT, m_terrainCreator->getTerrainData());
+			glBindTexture(GL_TEXTURE_3D, 0);
+			break;
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
 			break;
@@ -147,7 +153,8 @@ GLFWwindow * Renderer::createWindow(int width, int height)
 
 	glEnable(GL_DEPTH_TEST);
 
-	//glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSwapInterval(1);
 
 	//i_generateNewFrameBuffer();
 
@@ -191,6 +198,12 @@ Sceneobj * Renderer::getObjectById(size_t id)
 	if (id >= m_scene.size())
 		return nullptr;
 	return &(m_scene[id]);
+}
+
+void Renderer::setTerrainCreatorPtr(TerrainCreator* tcPtr, GLuint textureId)
+{
+	m_terrainTexture = textureId;
+	m_terrainCreator = tcPtr;
 }
 
 ShaderManager * Renderer::getShaderManager()

@@ -8,6 +8,6 @@ in gsData{
 
 void main()
 {
-	//fragColor = gsDataIn.color;
-	fragColor = vec4(1.f, 0.0f, 0.0f, 1.0f);
+	fragColor = gsDataIn.color;
+	//fragColor = vec4(1.f, 0.0f, 0.0f, 1.0f);
 }

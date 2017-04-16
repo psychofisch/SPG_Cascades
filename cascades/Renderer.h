@@ -15,7 +15,7 @@
 
 #include "Camera.h"
 #include "ShaderManager.h"
-//#include "TerrainCreator.h"
+#include "TerrainCreator.h"
 
 void glHandleError(const char* info);
 
@@ -56,6 +56,7 @@ public:
 	size_t addObjectToScene(GLfloat * vertices, int vSize, GLuint* vao);
 	Sceneobj* getObjectById(size_t id);
 	void Renderer::setPerspective(float fovy, float aspect, float near, float far);
+	void setTerrainCreatorPtr(TerrainCreator* tcPtr, GLuint textureId);
 
 	ShaderManager* getShaderManager();
 
@@ -70,6 +71,8 @@ private:
 	GLfloat m_nearPlane, m_farPlane;
 	glm::mat4 m_projection;
 	glm::mat4 m_view;
+	TerrainCreator* m_terrainCreator;
+	GLuint m_terrainTexture;
 
 	ShaderManager m_shaderManager;
 	void i_renderScene(Sceneobj* Scene, size_t size);

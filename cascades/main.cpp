@@ -32,9 +32,11 @@ void main(int agrc, char* argv[])
 	//};
 	//int vSize = 12;
 
-	TerrainCreator terrain(32, 64, 32);
+	TerrainCreator::vec3i terrainSize(64, 64, 64);
+
 	int t = time(NULL);
-	terrain.createTerrain(t, 1);
+	TerrainCreator terrain(terrainSize.x, terrainSize.y, terrainSize.z, t);
+	terrain.createTerrain();
 
 	int vSize = terrain.getNumberOfVertices(true);
 	GLfloat* vData = new GLfloat[vSize];
@@ -46,13 +48,15 @@ void main(int agrc, char* argv[])
 	GLuint densityTexture;
 	glGenTextures(1, &densityTexture);
 	glBindTexture(GL_TEXTURE_3D, densityTexture);
-	//glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	//glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 32, 64, 32, 0, GL_RED, GL_FLOAT, terrain.getTerrainData());
+	glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, terrainSize.x, terrainSize.y, terrainSize.z, 0, GL_RED, GL_FLOAT, terrain.getTerrainData());
 	glHandleError("post texture");
 	glBindTexture(GL_TEXTURE_3D, 0);
+
+	renderer.setTerrainCreatorPtr(&terrain, densityTexture);
 
 	ShaderManager* sM = renderer.getShaderManager();
 	size_t mainShader = sM->createNewShader();
