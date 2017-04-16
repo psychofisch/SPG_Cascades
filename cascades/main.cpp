@@ -44,6 +44,8 @@ void main(int agrc, char* argv[])
 
 	GLuint vao;
 	size_t objId = renderer.addObjectToScene(vData, vSize, &vao);
+	
+	delete[] vData;
 
 	GLuint densityTexture;
 	glGenTextures(1, &densityTexture);

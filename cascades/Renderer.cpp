@@ -65,7 +65,11 @@ void Renderer::Run()
 
 		m_view = glm::mat4();
 		float pi = 3.1415f;
-		float moveSpeed = 1.1f;
+		float moveSpeed = 5.f;
+
+		if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+			moveSpeed *= 0.1f;
+
 		glm::vec3 forwardVec(0, 0, moveSpeed),
 			sideVec(moveSpeed, 0, 0);
 

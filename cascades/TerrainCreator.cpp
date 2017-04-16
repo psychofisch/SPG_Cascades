@@ -38,7 +38,7 @@ int TerrainCreator::getNumberOfVertices(bool cube)
 			vSize += 3;	//3 vertices for every point
 	}
 
-	return vSize;
+	return vSize/8;
 }
 
 void TerrainCreator::getVertices(GLfloat* verticesOut, bool cube)

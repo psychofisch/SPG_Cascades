@@ -1,7 +1,7 @@
 #version 330 core
 layout(points) in;
-//layout(triangle_strip, max_vertices = 5) out;
-layout(points, max_vertices = 4) out;
+layout(triangle_strip, max_vertices = 32) out;
+//layout(points, max_vertices = 8) out;
 
 uniform sampler3D densityMap;
 
@@ -15,17 +15,17 @@ out gsData{
 	vec4 color;
 } gsDataOut;
 
-const vec3 neighbours[8] = vec3[8](vec3(0,0,0), vec3(1,0,0), vec3(0,1,0), vec3(1,1,0), vec3(0, 0, 1), vec3(1, 0, 1), vec3(0, 1, 1), vec3(1, 1, 1));
+const vec3 neighbours[8] = vec3[8](vec3(0, 0, 0), vec3(1, 0, 0), vec3(0, 1, 0), vec3(1, 1, 0), vec3(0, 0, 1), vec3(1, 0, 1), vec3(0, 1, 1), vec3(1, 1, 1));
 
 void build_quad(vec4 position, float size)
 {
-	gl_Position = position + vDataIn[0].pv * vec4(-size, -size, 0.0f, 0.0f);    // 1:bottom-left   
+	gl_Position = position + /*vDataIn[0].pv * */vec4(-size, -size, 0.0f, 0.0f);    // 1:bottom-left   
 	EmitVertex();
-	gl_Position = position + vDataIn[0].pv * vec4(size, -size, 0.0f, 0.0f);    // 2:bottom-right
+	gl_Position = position + /*vDataIn[0].pv * */vec4(size, -size, 0.0f, 0.0f);    // 2:bottom-right
 	EmitVertex();
-	gl_Position = position + vDataIn[0].pv * vec4(-size, size, 0.0f, 0.0f);    // 3:top-left
+	gl_Position = position + /*vDataIn[0].pv * */vec4(-size, size, 0.0f, 0.0f);    // 3:top-left
 	EmitVertex();
-	gl_Position = position + vDataIn[0].pv * vec4(size, size, 0.0f, 0.0f);    // 4:top-right
+	gl_Position = position + /*vDataIn[0].pv * */vec4(size, size, 0.0f, 0.0f);    // 4:top-right
 	EmitVertex();
 	EndPrimitive();
 }
@@ -46,19 +46,25 @@ void main() {
 		density = texture(densityMap, texCoords).r;
 
 		if (density > 0.f)
+		{
 			lookupIndex |= 1 << i;
+			//lookupIndex += 31;
+		}
 
 		if(density > 0.f)
 			gsDataOut.color = vec4(0.0f, 1.0f, 0.0f, 1.0f);
 		else
 			gsDataOut.color = vec4(1.0f, 0.0f, 1.0f, 1.0f);
+	}
 
-		if (lookupIndex > 0 && lookupIndex < 255)
-		{
-			gl_Position = gl_in[0].gl_Position + vDataIn[0].pv * vec4(offset, 1.0f);
-			EmitVertex();
-			EndPrimitive();
-		}
+	gsDataOut.color = vec4(lookupIndex / 255.f, 0.f, 1.0f, 1.0f);
+
+	if (lookupIndex > 0 && lookupIndex < 255)
+	{
+		build_quad(gl_in[0].gl_Position, 0.5f);
+		/*gl_Position = gl_in[0].gl_Position + vDataIn[0].pv * vec4(offset, 1.0f);
+		EmitVertex();
+		EndPrimitive();*/
 	}
 	
 	//if (density > 0.0f)
