@@ -81,9 +81,10 @@ float* TerrainCreator::createTerrain()
 		pillars[2] = glm::vec3(m_dimension.x * m_rng->getZeroToOne(), m_dimension.y * m_rng->getZeroToOne(), m_dimension.z * m_rng->getZeroToOne());
 		
 #pragma omp parallel for
-		for (int z = 0; z < m_dimension.z; ++z)
+		for (int y = 0; y < m_dimension.y; ++y)
 		{
-			for (uint y = 0; y < m_dimension.y; ++y)
+			float sinAdd = glm::sin(y/4);
+			for (uint z = 0; z < m_dimension.z; ++z)
 			{
 				for (uint x = 0; x < m_dimension.x; ++x)
 				{
@@ -97,7 +98,7 @@ float* TerrainCreator::createTerrain()
 					f += diagonal / glm::length(pillarVec[1]);
 					f += diagonal / glm::length(pillarVec[2]);
 					f *= 0.3f;
-					m_terrain[pos] = f;
+					m_terrain[pos] = f + sinAdd;
 					//if (f > 4.f)
 					//{
 					//	m_terrain[pos] = 1.0f;

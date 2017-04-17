@@ -103,6 +103,7 @@ void main() {
 
 	vec3 posColor = vDataIn[0].position / texSize;
 	gsDataOut.color = vec4(posColor.x, posColor.y, posColor.z, 1.0f);
+	gsDataOut.color = vec4(0, 1.f, 0, 1.0f);
 
 	//int edges = texture(edgeTable, lookupIndex).r;
 
@@ -117,8 +118,8 @@ void main() {
 				points[1] = texture(vertTable, vec2(float(i + 1) / 16, 1.0 - (float(lookupIndex) / 255))).r;
 				points[2] = texture(vertTable, vec2(float(i + 2) / 16, 1.0 - (float(lookupIndex) / 255))).r;
 
-				/*gsDataOut.color = vec4(1.0f, 0, 0, 1.0f);
-				gl_Position = gl_in[0].gl_Position;
+				gsDataOut.color = vec4(1.0f, 0, 0, 1.0f);
+				/*gl_Position = gl_in[0].gl_Position;
 				EmitVertex();
 				EndPrimitive();*/
 				buildTriangle(points[0], points[1], points[2]);
