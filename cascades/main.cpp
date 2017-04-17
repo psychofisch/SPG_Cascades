@@ -32,10 +32,10 @@ void main(int agrc, char* argv[])
 	//};
 	//int vSize = 12;
 
-	TerrainCreator::vec3i terrainSize(128, 128, 128);
+	TerrainCreator::vec3i terrainSize(64, 64, 64);
 
 	int t = time(NULL);
-	TerrainCreator terrain(terrainSize.x, terrainSize.y, terrainSize.z, t);
+	TerrainCreator terrain(terrainSize.x, terrainSize.y, terrainSize.z, 1337*3);
 	terrain.createTerrain();
 
 	int vSize = terrain.getNumberOfVertices(true);

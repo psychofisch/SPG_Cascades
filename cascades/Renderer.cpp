@@ -3,7 +3,8 @@
 
 
 Renderer::Renderer()
-	:m_debug(true)
+	:m_debug(true),
+	m_densityThreshold(4.f)
 {
 	m_camera.nearPlane = 0.1f;
 	m_camera.farPlane = 1000.0f;
@@ -24,9 +25,9 @@ void Renderer::key_callback(int key, int action)
 		case GLFW_KEY_H:
 			std::cout << "cameraPos: " << m_camera.position.x << "|" << m_camera.position.y << "|" << m_camera.position.z << "\n";
 			std::cout << "cameraRot: " << m_camera.rotation.x << "|" << m_camera.rotation.y << "|" << m_camera.rotation.z << "\n";
+			std::cout << "densityThreshold = " << m_densityThreshold << std::endl;
 			break;
 		case GLFW_KEY_T:
-			
 			m_terrainCreator->createTerrain();
 			glBindTexture(GL_TEXTURE_3D, m_terrainTexture);
 			glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, m_terrainCreator->getDimensions().x, m_terrainCreator->getDimensions().y, m_terrainCreator->getDimensions().z, 0, GL_RED, GL_FLOAT, m_terrainCreator->getTerrainData());
@@ -55,22 +56,29 @@ void Renderer::Run()
 	float lastframe = static_cast<float>(glfwGetTime());
 	m_dt = 0.014f;
 
-	/*glGenBuffers(1, &m_edgeTable);
-	glBindBuffer(GL_UNIFORM_BUFFER, m_edgeTable);
-	glBufferData(GL_UNIFORM_BUFFER, 256 * 16 * sizeof(int), vertTable, GL_STATIC_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-	glHandleError("vertTable");*/
 	glHandleError("pre edgeTable");
 
-	glGenTextures(1, &m_edgeTable);
-	glBindTexture(GL_TEXTURE_2D, m_edgeTable);
+	glGenTextures(1, &m_vertTable);
+	glBindTexture(GL_TEXTURE_2D, m_vertTable);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 16, 256, 0, GL_RED_INTEGER, GL_INT, vertTable);
-	glHandleError("post edgeTable");
+	glHandleError("post vertable");
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glGenTextures(1, &m_edgeTable);
+	glBindTexture(GL_TEXTURE_1D, m_edgeTable);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage1D(GL_TEXTURE_1D, 0, GL_R32I, 256, 0, GL_RED_INTEGER, GL_INT, edgeTable);
+	glHandleError("post edgeTable");
+	glBindTexture(GL_TEXTURE_1D, 0);
+
+	mouse_callback(m_size.x/2, m_size.y/2);
 
 	while (!glfwWindowShouldClose(m_window))
 	{
@@ -104,6 +112,13 @@ void Renderer::Run()
 			m_camera.position -= sideVec * m_camera.rotation;
 		else if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
 			m_camera.position += sideVec * m_camera.rotation;
+
+		if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS)
+			m_densityThreshold += (1.0f * m_dt);
+		else if (glfwGetKey(m_window, GLFW_KEY_E) == GLFW_PRESS)
+			m_densityThreshold -= (1.0f * m_dt);
+
+		glm::clamp(m_densityThreshold, 0.f, 100.f);
 
 		//glm::mat4 translate = glm::mat4(1.0f);
 		m_view = glm::translate(m_view, -m_camera.position);
@@ -241,8 +256,14 @@ void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 	glUniformMatrix4fv(glGetUniformLocation(shaderId, "view"), 1, GL_FALSE, glm::value_ptr(m_view));
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_edgeTable);
+	glBindTexture(GL_TEXTURE_2D, m_vertTable);
 	glUniform1i(glGetUniformLocation(shaderId, "vertTable"), 0);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_1D, m_edgeTable);
+	glUniform1i(glGetUniformLocation(shaderId, "edgeTable"), 2);
+
+	glUniform1f(glGetUniformLocation(shaderId, "densityThreshold"), m_densityThreshold);
 
 	for (int i = 0; i < size; ++i)
 	{

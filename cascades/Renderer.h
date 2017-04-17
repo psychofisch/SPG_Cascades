@@ -17,6 +17,7 @@
 #include "ShaderManager.h"
 #include "TerrainCreator.h"
 #include "vertTable.h"
+#include "edgeTable.h"
 
 void glHandleError(const char* info);
 
@@ -69,11 +70,12 @@ private:
 	bool m_debug;
 	std::vector<Sceneobj> m_scene;
 	float m_dt;
-	GLfloat m_nearPlane, m_farPlane;
+	GLfloat m_nearPlane, m_farPlane, m_densityThreshold;
 	glm::mat4 m_projection;
 	glm::mat4 m_view;
 	TerrainCreator* m_terrainCreator;
 	GLuint m_terrainTexture,
+			m_vertTable,
 			m_edgeTable;
 
 	ShaderManager m_shaderManager;

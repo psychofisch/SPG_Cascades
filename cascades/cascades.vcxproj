@@ -133,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="edgeTable.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RNGesus.h" />
     <ClInclude Include="Shader.h" />

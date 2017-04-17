@@ -1,10 +1,12 @@
 #version 330 core
 layout(points) in;
-layout(triangle_strip, max_vertices = 12) out;
+layout(triangle_strip, max_vertices = 32) out;
 //layout(points, max_vertices = 64) out;
 
 uniform isampler2D vertTable;
+uniform isampler2D edgeTable;
 uniform sampler3D densityMap;
+uniform float densityThreshold;
 
 in vData{
 	mat4 p;
@@ -46,20 +48,32 @@ void build_quad(vec4 position, float size)
 	EndPrimitive();
 }
 
-void buildTriangle(vec3 p0, vec3 p1, vec3 p2)
+vec4 decideColor(int i)
+{
+	if (i >= 0 && i < 4)
+		return vec4(1.f, 0, 0, 1.0f);
+	else if (i >= 4 && i < 8)
+		return vec4(0, 1.f, 0, 1.0f);
+	else if (i >= 8)
+		return vec4(0, 0, 1.f, 1.0f);
+	else
+		return vec4(1.f, 1.f, 1.f, 1.f);
+}
+
+void buildTriangle(int p0, int p1, int p2)
 {
 	mat4 pv = vDataIn[0].p * vDataIn[0].v;
 
-	//gsDataOut.color = vec4(1.0f, 0, 0, 1.0f);
-	gl_Position = gl_in[0].gl_Position + pv * vec4(p0, 1.0f);
+	gsDataOut.color = decideColor(p0);
+	gl_Position = gl_in[0].gl_Position + pv * vec4(edges[p0], 1.0f);
+	EmitVertex();
+	
+	gsDataOut.color = decideColor(p1);
+	gl_Position = gl_in[0].gl_Position + pv * vec4(edges[p1], 1.0f);
 	EmitVertex();
 
-	//gsDataOut.color = vec4(0, 1.0f, 0, 1.0f);
-	gl_Position = gl_in[0].gl_Position + pv * vec4(p1, 1.0f);
-	EmitVertex();
-
-	//gsDataOut.color = vec4(0, 0, 1.0f, 1.0f);
-	gl_Position = gl_in[0].gl_Position + pv * vec4(p2, 1.0f);
+	gsDataOut.color = decideColor(p2);
+	gl_Position = gl_in[0].gl_Position + pv * vec4(edges[p2], 1.0f);
 	EmitVertex();
 
 	EndPrimitive();
@@ -81,7 +95,7 @@ void main() {
 		vec3 texCoords = (((vDataIn[0].position + offset) / textureSize(densityMap, 0))) + .5f;
 		density = texture(densityMap, texCoords).r;
 
-		if (density > 0.f)
+		if (density > densityThreshold)
 		{
 			lookupIndex |= 1 << i;
 		}
@@ -90,30 +104,38 @@ void main() {
 	vec3 posColor = vDataIn[0].position / texSize;
 	gsDataOut.color = vec4(posColor.x, posColor.y, posColor.z, 1.0f);
 
-	for (int i = 0; i < 16; i += 3)
-	{
-		if (texture(vertTable, vec2(float(i) / 16, 1.0 - (float(lookupIndex) / 255))).r != -1)
-		{
-			int points[3];
-			points[0] = texture(vertTable, vec2(float(i) / 16, 1.0 - (float(lookupIndex) / 255))).r;
-			points[1] = texture(vertTable, vec2(float(i+1) / 16, 1.0 - (float(lookupIndex) / 255))).r;
-			points[2] = texture(vertTable, vec2(float(i+2) / 16, 1.0 - (float(lookupIndex) / 255))).r;
+	//int edges = texture(edgeTable, lookupIndex).r;
 
-			/*gsDataOut.color = vec4(1.0f, 0, 0, 1.0f);
-			gl_Position = gl_in[0].gl_Position;
-			EmitVertex();
-			EndPrimitive();*/
-			buildTriangle(edges[points[0]] * 2.0f, edges[points[1]] * 2.0f, edges[points[2]] * 2.0f);
-		}
-		/*else
+	/*if (edges != 0)
+	{*/
+		for (int i = 0; i < 16; i += 3)
 		{
-			gsDataOut.color = vec4(0, 1.0f, 0, 1.0f);
-			gl_Position = gl_in[0].gl_Position;
-			EmitVertex();
-			EndPrimitive();
-			break;
-		}*/
-	}
+			if (texture(vertTable, vec2(float(i) / 16, 1.0 - (float(lookupIndex) / 255))).r != -1)
+			{
+				int points[3];
+				points[0] = texture(vertTable, vec2(float(i) / 16, 1.0 - (float(lookupIndex) / 255))).r;
+				points[1] = texture(vertTable, vec2(float(i + 1) / 16, 1.0 - (float(lookupIndex) / 255))).r;
+				points[2] = texture(vertTable, vec2(float(i + 2) / 16, 1.0 - (float(lookupIndex) / 255))).r;
+
+				/*gsDataOut.color = vec4(1.0f, 0, 0, 1.0f);
+				gl_Position = gl_in[0].gl_Position;
+				EmitVertex();
+				EndPrimitive();*/
+				buildTriangle(points[0], points[1], points[2]);
+			}
+			else
+				break;
+
+			/*else
+			{
+				gsDataOut.color = vec4(0, 1.0f, 0, 1.0f);
+				gl_Position = gl_in[0].gl_Position;
+				EmitVertex();
+				EndPrimitive();
+				break;
+			}*/
+		}
+	//}
 
 	//if (lookupIndex == 0 && lookupIndex < 255)
 	//{

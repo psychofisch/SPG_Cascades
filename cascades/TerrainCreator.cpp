@@ -38,18 +38,18 @@ int TerrainCreator::getNumberOfVertices(bool cube)
 			vSize += 3;	//3 vertices for every point
 	}
 
-	return vSize/8;
+	return vSize;///8
 }
 
 void TerrainCreator::getVertices(GLfloat* verticesOut, bool cube)
 {
 	int vCount = 0;
 
-	for (uint z = 0; z < m_dimension.z; z += 2)
+	for (uint z = 0; z < m_dimension.z; z += 1)
 	{
-		for (uint y = 0; y < m_dimension.y; y += 2)
+		for (uint y = 0; y < m_dimension.y; y += 1)
 		{
-			for (uint x = 0; x < m_dimension.x; x += 2)
+			for (uint x = 0; x < m_dimension.x; x += 1)
 			{
 				uint pos = x + y*m_dimension.x + z*(m_dimension.y * m_dimension.x);
 				if (cube || m_terrain[pos] == 1.0f)
@@ -97,16 +97,17 @@ float* TerrainCreator::createTerrain()
 					f += diagonal / glm::length(pillarVec[1]);
 					f += diagonal / glm::length(pillarVec[2]);
 					f *= 0.3f;
-					if (f > 4.f)
-					{
-						m_terrain[pos] = 1.0f;
-						//std::cout << "#";
-					}
-					else
-					{
-						m_terrain[pos] = 0.0f;
-						//std::cout << " ";
-					}
+					m_terrain[pos] = f;
+					//if (f > 4.f)
+					//{
+					//	m_terrain[pos] = 1.0f;
+					//	//std::cout << "#";
+					//}
+					//else
+					//{
+					//	m_terrain[pos] = 0.0f;
+					//	//std::cout << " ";
+					//}
 				}
 				//std::cout << std::endl;
 			}
