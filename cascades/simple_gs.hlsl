@@ -19,7 +19,17 @@ out gsData{
 	vec4 color;
 } gsDataOut;
 
-const vec3 neighbours[8] = vec3[8](vec3(0, 0, 0), vec3(1, 0, 0), vec3(0, 1, 0), vec3(1, 1, 0), vec3(0, 0, 1), vec3(1, 0, 1), vec3(0, 1, 1), vec3(1, 1, 1));
+const vec3 neighbours[8] = vec3[](
+	vec3(0, 0, 0),
+	vec3(0, 0, 1),
+	vec3(0, 1, 0),
+	vec3(0, 1, 1),
+	vec3(1, 0, 0),
+	vec3(1, 0, 1),
+	vec3(1, 1, 0),
+	vec3(1, 1, 1)
+);
+
 const vec3 edges[12] = vec3[](
 	vec3(0.5f, 0, 0),		//0
 	vec3(1.f, 0.5f, 0),		//1
