@@ -33,6 +33,12 @@ void Renderer::key_callback(int key, int action)
 			glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, m_terrainCreator->getDimensions().x, m_terrainCreator->getDimensions().y, m_terrainCreator->getDimensions().z, 0, GL_RED, GL_FLOAT, m_terrainCreator->getTerrainData());
 			glBindTexture(GL_TEXTURE_3D, 0);
 			break;
+		case GLFW_KEY_C:
+			m_shaderManager.clearShader(0);
+			m_shaderManager.attachShaderToProgram(0, "simple_vs.hlsl", GL_VERTEX_SHADER);
+			m_shaderManager.attachShaderToProgram(0, "simple_fs.hlsl", GL_FRAGMENT_SHADER);
+			m_shaderManager.attachShaderToProgram(0, "simple_gs.hlsl", GL_GEOMETRY_SHADER);
+			break;
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
 			break;

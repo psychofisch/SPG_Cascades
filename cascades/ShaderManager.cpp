@@ -18,6 +18,13 @@ size_t ShaderManager::createNewShader()
 	return result;
 }
 
+void ShaderManager::clearShader(size_t id)
+{
+	glDeleteShader(m_shaders[id]->getGLProgramID());
+	delete m_shaders[id];
+	m_shaders[id] = new Shader();
+}
+
 void ShaderManager::attachShaderToProgram(size_t Shader, const char* Path, int ShaderType)
 {
 	m_shaders[Shader]->AttachShaderToProgram(Path, ShaderType);
