@@ -21,28 +21,28 @@ out gsData{
 
 const vec3 neighbours[8] = vec3[](
 	vec3(0, 0, 0),
-	vec3(0, 0, 1),
-	vec3(0, 1, 0),
-	vec3(0, 1, 1),
 	vec3(1, 0, 0),
 	vec3(1, 0, 1),
+	vec3(0, 0, 1),
+	vec3(0, 1, 0),
 	vec3(1, 1, 0),
-	vec3(1, 1, 1)
+	vec3(1, 1, 1),
+	vec3(0, 1, 1)
 );
 
 const vec3 edges[12] = vec3[](
 	vec3(0.5f, 0, 0),		//0
-	vec3(1.f, 0.5f, 0),		//1
-	vec3(0.5f, 1.f, 0),		//2
-	vec3(0, 0.5f, 0),		//3
-	vec3(0.5f, 0, 1.f),		//4
-	vec3(1.f, 0.5f, 1.f),	//5
+	vec3(1.f, 0, 0.5f),		//1
+	vec3(0.5f, 0, 1.f),		//2
+	vec3(0, 0, 0.5f),		//3
+	vec3(0.5f, 1.f, 0),		//4
+	vec3(1.f, 1.f, 0.5f),	//5
 	vec3(0.5f, 1.f, 1.f),	//6
-	vec3(0, 0.5f, 1.f),		//7
-	vec3(0, 0, 0.5f),		//8
-	vec3(1.f, 0, 0.5f),		//9
-	vec3(1.f, 1.f, 0.5f),	//10
-	vec3(0, 1.f, 0.5f)		//11
+	vec3(0, 1.f, 0.5f),		//7
+	vec3(0, 0.5f, 0),		//8
+	vec3(1.f, 0.5f, 0),		//9
+	vec3(1.f, 0.5f, 1.f),	//10
+	vec3(0, 0.5f, 1.f)		//11
 );
 
 void build_quad(vec4 position, float size)
