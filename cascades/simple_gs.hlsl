@@ -70,23 +70,37 @@ vec4 decideColor(int i)
 		return vec4(1.f, 1.f, 1.f, 1.f);
 }
 
-void buildTriangle(int p0, int p1, int p2)
+void buildTriangle(vec3 p0, vec3 p1, vec3 p2)
 {
 	mat4 pv = vDataIn[0].p * vDataIn[0].v;
 
-	gsDataOut.color = decideColor(p0);
-	gl_Position = gl_in[0].gl_Position + pv * vec4(edges[p0], 1.0f);
+	//gsDataOut.color = decideColor(p0);
+	gl_Position = gl_in[0].gl_Position + pv * vec4(p0, 1.0f);
 	EmitVertex();
 	
-	gsDataOut.color = decideColor(p1);
-	gl_Position = gl_in[0].gl_Position + pv * vec4(edges[p1], 1.0f);
+	//gsDataOut.color = decideColor(p1);
+	gl_Position = gl_in[0].gl_Position + pv * vec4(p1, 1.0f);
 	EmitVertex();
 
-	gsDataOut.color = decideColor(p2);
-	gl_Position = gl_in[0].gl_Position + pv * vec4(edges[p2], 1.0f);
+	//gsDataOut.color = decideColor(p2);
+	gl_Position = gl_in[0].gl_Position + pv * vec4(p2, 1.0f);
 	EmitVertex();
 
 	EndPrimitive();
+}
+
+vec3 calculateNormals(vec3 p1, vec3 p2, vec3 p3)
+{
+	vec3 normal;
+
+	vec3 u = p2 - p1;
+	vec3 v = p3 - p1;
+
+	normal.x = (u.y * v.z) - (u.z * v.y);
+	normal.y = (u.z * v.x) - (u.x * v.z);
+	normal.z = (u.x * v.y) - (u.y * v.x);
+
+	return normalize(normal);
 }
 
 void main() {
@@ -114,46 +128,23 @@ void main() {
 	vec3 posColor = vDataIn[0].position / texSize;
 	gsDataOut.color = vec4(posColor.x, posColor.y, posColor.z, 1.0f);
 	gsDataOut.color = vec4(0, 1.f, 0, 1.0f);
+	vec3 normals;
 
-	//int edges = texture(edgeTable, lookupIndex).r;
-
-	/*if (edges != 0)
-	{*/
-		for (int i = 0; i < 16; i += 3)
+	for (int i = 0; i < 16; i += 3)
+	{
+		if (texture(vertTable, vec2(float(i) / 16, 1.0 - (float(lookupIndex) / 255))).r != -1)
 		{
-			if (texture(vertTable, vec2(float(i) / 16, 1.0 - (float(lookupIndex) / 255))).r != -1)
-			{
-				int points[3];
-				points[0] = texture(vertTable, vec2(float(i) / 16, 1.0 - (float(lookupIndex) / 255))).r;
-				points[1] = texture(vertTable, vec2(float(i + 1) / 16, 1.0 - (float(lookupIndex) / 255))).r;
-				points[2] = texture(vertTable, vec2(float(i + 2) / 16, 1.0 - (float(lookupIndex) / 255))).r;
+			int points[3];
+			points[0] = texture(vertTable, vec2(float(i) / 16, 1.0 - (float(lookupIndex) / 255))).r;
+			points[1] = texture(vertTable, vec2(float(i + 1) / 16, 1.0 - (float(lookupIndex) / 255))).r;
+			points[2] = texture(vertTable, vec2(float(i + 2) / 16, 1.0 - (float(lookupIndex) / 255))).r;
 
-				gsDataOut.color = vec4(1.0f, 0, 0, 1.0f);
-				/*gl_Position = gl_in[0].gl_Position;
-				EmitVertex();
-				EndPrimitive();*/
-				buildTriangle(points[0], points[1], points[2]);
-			}
-			else
-				break;
-
-			/*else
-			{
-				gsDataOut.color = vec4(0, 1.0f, 0, 1.0f);
-				gl_Position = gl_in[0].gl_Position;
-				EmitVertex();
-				EndPrimitive();
-				break;
-			}*/
+			gsDataOut.color = vec4(1.0f, 0, 0, 1.0f);
+			normals = calculateNormals(edges[points[0]], edges[points[1]], edges[points[2]]);
+			gsDataOut.color = vec4(abs(normals), 1.0);
+			buildTriangle(edges[points[0]], edges[points[1]], edges[points[2]]);
 		}
-	//}
-
-	//if (lookupIndex == 0 && lookupIndex < 255)
-	//{
-	//	gsDataOut.color = vec4(lookupIndex/255.f, 1.0f, 0.0f, 1.0f);
-	//	build_quad(gl_in[0].gl_Position, 0.5f);
-	//	/*gl_Position = gl_in[0].gl_Position + vDataIn[0].pv * vec4(offset, 1.0f);
-	//	EmitVertex();
-	//	EndPrimitive();*/
-	//}
+		else
+			break;
+	}
 }
