@@ -35,9 +35,9 @@ void Renderer::key_callback(int key, int action)
 			break;
 		case GLFW_KEY_C:
 			m_shaderManager.clearShader(0);
-			m_shaderManager.attachShaderToProgram(0, "simple_vs.hlsl", GL_VERTEX_SHADER);
-			m_shaderManager.attachShaderToProgram(0, "simple_fs.hlsl", GL_FRAGMENT_SHADER);
-			m_shaderManager.attachShaderToProgram(0, "simple_gs.hlsl", GL_GEOMETRY_SHADER);
+			m_shaderManager.attachShaderToProgram(0, "simple_vs.glsl", GL_VERTEX_SHADER);
+			m_shaderManager.attachShaderToProgram(0, "simple_fs.glsl", GL_FRAGMENT_SHADER);
+			m_shaderManager.attachShaderToProgram(0, "simple_gs.glsl", GL_GEOMETRY_SHADER);
 			break;
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
@@ -270,6 +270,8 @@ void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 	glUniform1i(glGetUniformLocation(shaderId, "edgeTable"), 2);
 
 	glUniform1f(glGetUniformLocation(shaderId, "densityThreshold"), m_densityThreshold);
+
+	glUniform3f(glGetUniformLocation(shaderId, "lightPos"), m_camera.position.x, m_camera.position.y, m_camera.position.z);
 
 	for (int i = 0; i < size; ++i)
 	{

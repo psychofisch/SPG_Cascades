@@ -16,6 +16,7 @@ in vData{
 
 out gsData{
 	vec3 position;
+	vec3 normal;
 	vec4 color;
 } gsDataOut;
 
@@ -100,7 +101,7 @@ vec3 calculateNormals(vec3 p1, vec3 p2, vec3 p3)
 	normal.y = (u.z * v.x) - (u.x * v.z);
 	normal.z = (u.x * v.y) - (u.y * v.x);
 
-	return normalize(normal);
+	return normalize(-normal);
 }
 
 void main() {
@@ -141,6 +142,7 @@ void main() {
 
 			gsDataOut.color = vec4(1.0f, 0, 0, 1.0f);
 			normals = calculateNormals(edges[points[0]], edges[points[1]], edges[points[2]]);
+			gsDataOut.normal = normals;
 			gsDataOut.color = vec4(abs(normals), 1.0);
 			buildTriangle(edges[points[0]], edges[points[1]], edges[points[2]]);
 		}

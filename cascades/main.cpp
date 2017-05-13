@@ -63,9 +63,9 @@ void main(int agrc, char* argv[])
 
 	ShaderManager* sM = renderer.getShaderManager();
 	size_t mainShader = sM->createNewShader();
-	sM->attachShaderToProgram(mainShader, "simple_vs.hlsl", GL_VERTEX_SHADER);
-	sM->attachShaderToProgram(mainShader, "simple_fs.hlsl", GL_FRAGMENT_SHADER);
-	sM->attachShaderToProgram(mainShader, "simple_gs.hlsl", GL_GEOMETRY_SHADER);
+	sM->attachShaderToProgram(mainShader, "simple_vs.glsl", GL_VERTEX_SHADER);
+	sM->attachShaderToProgram(mainShader, "simple_fs.glsl", GL_FRAGMENT_SHADER);
+	sM->attachShaderToProgram(mainShader, "simple_gs.glsl", GL_GEOMETRY_SHADER);
 
 	renderer.getObjectById(objId)->shader = mainShader;
 	renderer.getObjectById(objId)->iCount = vSize / 3;
