@@ -14,7 +14,7 @@ in vData{
 	vec3 position;//without pv, unlike gl_position
 } vDataIn[];
 
-out gsData{
+out Data{
 	vec3 position;
 	vec3 normal;
 	vec4 color;

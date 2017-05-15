@@ -167,8 +167,8 @@ GLFWwindow * Renderer::createWindow(int width, int height)
 	m_size = glm::vec2(width, height);
 
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
@@ -272,6 +272,7 @@ void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 	glUniform1f(glGetUniformLocation(shaderId, "densityThreshold"), m_densityThreshold);
 
 	glUniform3f(glGetUniformLocation(shaderId, "lightPos"), m_camera.position.x, m_camera.position.y, m_camera.position.z);
+	glUniform3f(glGetUniformLocation(shaderId, "cameraPos"), m_camera.position.x, m_camera.position.y, m_camera.position.z);
 
 	for (int i = 0; i < size; ++i)
 	{
