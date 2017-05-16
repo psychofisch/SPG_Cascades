@@ -1,10 +1,11 @@
-#version 330 core
+#version 440 core
 layout(points) in;
-layout(triangle_strip, max_vertices = 32) out;
+layout(triangle_strip, max_vertices = 15) out;
 //layout(points, max_vertices = 64) out;
 
 uniform isampler2D vertTable;
-uniform isampler2D edgeTable;
+//uniform isampler2D edgeTable;
+//uniform int edgeTable[256];
 uniform sampler3D densityMap;
 uniform float densityThreshold;
 
@@ -19,6 +20,8 @@ out Data{
 	vec3 normal;
 	vec4 color;
 } gsDataOut;
+
+out vec3 feedbackOut[15];
 
 const vec3 neighbours[8] = vec3[](
 	vec3(0, 0, 0),
@@ -101,7 +104,7 @@ vec3 calculateNormals(vec3 p1, vec3 p2, vec3 p3)
 	normal.y = (u.z * v.x) - (u.x * v.z);
 	normal.z = (u.x * v.y) - (u.y * v.x);
 
-	return normalize(-normal);
+	return normalize(normal);
 }
 
 void main() {
@@ -141,10 +144,13 @@ void main() {
 			points[2] = texture(vertTable, vec2(float(i + 2) / 16, 1.0 - (float(lookupIndex) / 255))).r;
 
 			gsDataOut.color = vec4(1.0f, 0, 0, 1.0f);
-			normals = calculateNormals(edges[points[0]], edges[points[1]], edges[points[2]]);
+			normals = calculateNormals(edges[points[2]], edges[points[1]], edges[points[0]]);//to fit the normal calculation
 			gsDataOut.normal = normals;
 			gsDataOut.color = vec4(abs(normals), 1.0);
-			buildTriangle(edges[points[0]], edges[points[1]], edges[points[2]]);
+			buildTriangle(edges[points[2]], edges[points[1]], edges[points[0]]);
+			feedbackOut[i] = edges[points[2]];
+			feedbackOut[i + 1] = edges[points[1]];
+			feedbackOut[i + 2] = edges[points[0]];
 		}
 		else
 			break;

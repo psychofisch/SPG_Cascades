@@ -38,6 +38,7 @@ void Renderer::key_callback(int key, int action)
 			m_shaderManager.attachShaderToProgram(0, "simple_vs.glsl", GL_VERTEX_SHADER);
 			m_shaderManager.attachShaderToProgram(0, "simple_fs.glsl", GL_FRAGMENT_SHADER);
 			m_shaderManager.attachShaderToProgram(0, "simple_gs.glsl", GL_GEOMETRY_SHADER);
+			m_shaderManager.LinkShader(0);
 			break;
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
@@ -74,7 +75,7 @@ void Renderer::Run()
 	glHandleError("post vertable");
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	glGenTextures(1, &m_edgeTable);
+	/*glGenTextures(1, &m_edgeTable);
 	glBindTexture(GL_TEXTURE_1D, m_edgeTable);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP);
@@ -82,7 +83,7 @@ void Renderer::Run()
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage1D(GL_TEXTURE_1D, 0, GL_R32I, 256, 0, GL_RED_INTEGER, GL_INT, edgeTable);
 	glHandleError("post edgeTable");
-	glBindTexture(GL_TEXTURE_1D, 0);
+	glBindTexture(GL_TEXTURE_1D, 0);*/
 
 	mouse_callback(m_size.x/2, m_size.y/2);
 
@@ -265,13 +266,15 @@ void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 	glBindTexture(GL_TEXTURE_2D, m_vertTable);
 	glUniform1i(glGetUniformLocation(shaderId, "vertTable"), 0);
 
-	glActiveTexture(GL_TEXTURE2);
+	/*glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_1D, m_edgeTable);
-	glUniform1i(glGetUniformLocation(shaderId, "edgeTable"), 2);
+	glUniform1i(glGetUniformLocation(shaderId, "edgeTable"), 2);*/
+	//glUniform1iv(glGetUniformLocation(shaderId, "edgeTable"), 256, edgeTable);
 
 	glUniform1f(glGetUniformLocation(shaderId, "densityThreshold"), m_densityThreshold);
 
 	glUniform3f(glGetUniformLocation(shaderId, "lightPos"), m_camera.position.x, m_camera.position.y, m_camera.position.z);
+	//glUniform3f(glGetUniformLocation(shaderId, "lightPos"), 0, 0, 0);
 	glUniform3f(glGetUniformLocation(shaderId, "cameraPos"), m_camera.position.x, m_camera.position.y, m_camera.position.z);
 
 	for (int i = 0; i < size; ++i)
@@ -284,6 +287,11 @@ void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 		glDrawArrays(GL_POINTS, 0, scene[i].iCount);
 		glBindVertexArray(0);
 	}
+}
+
+void Renderer::i_transformFeedback()
+{
+
 }
 
 void Renderer::setPerspective(float fovy, float aspect, float near, float far)

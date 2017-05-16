@@ -80,4 +80,5 @@ private:
 
 	ShaderManager m_shaderManager;
 	void i_renderScene(Sceneobj* Scene, size_t size);
+	void i_transformFeedback();
 };

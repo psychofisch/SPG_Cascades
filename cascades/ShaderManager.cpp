@@ -30,6 +30,11 @@ void ShaderManager::attachShaderToProgram(size_t Shader, const char* Path, int S
 	m_shaders[Shader]->AttachShaderToProgram(Path, ShaderType);
 }
 
+void ShaderManager::LinkShader(size_t shaderId)
+{
+	m_shaders[shaderId]->LinkShader();
+}
+
 void ShaderManager::UseShader(size_t id)
 {
 	m_shaders[id]->Use();

@@ -146,9 +146,45 @@ void Shader::AttachShaderToProgram(const char* path, int ShaderType)
 	}
 
 	// Shader Program
-	//m_program = glCreateProgram();
 	glUseProgram(m_program);
 	glAttachShader(m_program, shader);
+
+	if (ShaderType == GL_VERTEX_SHADER)
+	{
+		m_vs = shader;
+	}
+	else if (ShaderType == GL_GEOMETRY_SHADER)
+	{
+		m_gs = shader;
+		const GLchar* feedbackVaryings[] = { "feedbackOut" };
+		glTransformFeedbackVaryings(m_program, 1, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
+	}
+	else if (ShaderType == GL_FRAGMENT_SHADER)
+	{
+		m_fs = shader;
+	}
+
+	//glLinkProgram(m_program);
+	//// Print linking errors if any
+	//glGetProgramiv(m_program, GL_LINK_STATUS, &success);
+	//if (!success)
+	//{
+	//	glGetProgramInfoLog(m_program, 512, NULL, infoLog);
+	//	std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+	//	std::cin.ignore();
+	//}
+
+	//// Delete the shaders as they're linked into our program now and no longer necessary
+	//glDeleteShader(shader);
+}
+
+void Shader::LinkShader()
+{
+	//return;
+	GLint success;
+	GLchar infoLog[512];
+
+	//glUseProgram(m_program);
 	glLinkProgram(m_program);
 	// Print linking errors if any
 	glGetProgramiv(m_program, GL_LINK_STATUS, &success);
@@ -156,9 +192,13 @@ void Shader::AttachShaderToProgram(const char* path, int ShaderType)
 	{
 		glGetProgramInfoLog(m_program, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+		std::cin.ignore();
 	}
+
 	// Delete the shaders as they're linked into our program now and no longer necessary
-	glDeleteShader(shader);
+	glDeleteShader(m_vs);
+	glDeleteShader(m_gs);
+	glDeleteShader(m_fs);
 }
 
 void Shader::checkCompileErrors(GLuint shader, std::string type)

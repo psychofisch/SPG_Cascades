@@ -64,8 +64,9 @@ void main(int agrc, char* argv[])
 	ShaderManager* sM = renderer.getShaderManager();
 	size_t mainShader = sM->createNewShader();
 	sM->attachShaderToProgram(mainShader, "simple_vs.glsl", GL_VERTEX_SHADER);
-	sM->attachShaderToProgram(mainShader, "simple_fs.glsl", GL_FRAGMENT_SHADER);
 	sM->attachShaderToProgram(mainShader, "simple_gs.glsl", GL_GEOMETRY_SHADER);
+	sM->attachShaderToProgram(mainShader, "simple_fs.glsl", GL_FRAGMENT_SHADER);
+	sM->LinkShader(mainShader);
 
 	renderer.getObjectById(objId)->shader = mainShader;
 	renderer.getObjectById(objId)->iCount = vSize / 3;
@@ -74,6 +75,9 @@ void main(int agrc, char* argv[])
 	renderer.Run();
 	
 	glfwTerminate();
+	
+	std::cout << "Press ENTER to exit...\n";
+	std::cin.ignore();
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
