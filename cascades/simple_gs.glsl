@@ -19,9 +19,10 @@ out Data{
 	vec3 position;
 	vec3 normal;
 	vec4 color;
+	mat4 pv;
 } gsDataOut;
 
-out vec3 feedbackOut[15];
+//out vec3 feedbackOut[15];
 
 const vec3 neighbours[8] = vec3[](
 	vec3(0, 0, 0),
@@ -76,7 +77,7 @@ vec4 decideColor(int i)
 
 void buildTriangle(vec3 p0, vec3 p1, vec3 p2)
 {
-	mat4 pv = vDataIn[0].p * vDataIn[0].v;
+	mat4 pv = gsDataOut.pv;
 
 	//gsDataOut.color = decideColor(p0);
 	gl_Position = gl_in[0].gl_Position + pv * vec4(p0, 1.0f);
@@ -114,6 +115,7 @@ void main() {
 	float density = texture(densityMap, texCoords).r;
 	//gsDataOut.color = vec4(texture(densityMap, vDataIn[0].position / textureSize(densityMap, 0)).r, 0.0f, 0.0f, 1.0f);
 	gsDataOut.position = vDataIn[0].position;
+	gsDataOut.pv = vDataIn[0].p * vDataIn[0].v;
 
 	int lookupIndex = 0;
 	for (int i = 0; i < 8; ++i)
@@ -148,9 +150,9 @@ void main() {
 			gsDataOut.normal = normals;
 			gsDataOut.color = vec4(abs(normals), 1.0);
 			buildTriangle(edges[points[2]], edges[points[1]], edges[points[0]]);
-			feedbackOut[i] = edges[points[2]];
-			feedbackOut[i + 1] = edges[points[1]];
-			feedbackOut[i + 2] = edges[points[0]];
+			// feedbackOut[i] = edges[points[2]];
+			// feedbackOut[i + 1] = edges[points[1]];
+			// feedbackOut[i + 2] = edges[points[0]];
 		}
 		else
 			break;

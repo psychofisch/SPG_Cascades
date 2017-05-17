@@ -13,6 +13,8 @@
 #include <glm/gtx/spline.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include "SOIL.h"
+
 #include "Camera.h"
 #include "ShaderManager.h"
 #include "TerrainCreator.h"
@@ -75,8 +77,9 @@ private:
 	glm::mat4 m_view;
 	TerrainCreator* m_terrainCreator;
 	GLuint m_terrainTexture,
-			m_vertTable,
-			m_edgeTable;
+		m_vertTable,
+		m_edgeTable,
+		m_diffuseTexture;
 
 	ShaderManager m_shaderManager;
 	void i_renderScene(Sceneobj* Scene, size_t size);

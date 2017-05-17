@@ -85,6 +85,25 @@ void Renderer::Run()
 	glHandleError("post edgeTable");
 	glBindTexture(GL_TEXTURE_1D, 0);*/
 
+	// Load and create a texture 
+	// ====================
+	// Texture 1
+	// ====================
+	glGenTextures(1, &m_diffuseTexture);
+	glBindTexture(GL_TEXTURE_2D, m_diffuseTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// Set texture filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Load, create texture and generate mipmaps
+	int width, height;
+	unsigned char* image = SOIL_load_image("soil.jpg", &width, &height, 0, SOIL_LOAD_RGB);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	SOIL_free_image_data(image);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	mouse_callback(m_size.x/2, m_size.y/2);
 
 	while (!glfwWindowShouldClose(m_window))
@@ -265,6 +284,10 @@ void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_vertTable);
 	glUniform1i(glGetUniformLocation(shaderId, "vertTable"), 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_diffuseTexture);
+	glUniform1i(glGetUniformLocation(shaderId, "diffuseTexture"), 1);
 
 	/*glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_1D, m_edgeTable);

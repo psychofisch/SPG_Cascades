@@ -138,6 +138,7 @@
     <ClInclude Include="RNGesus.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="SOIL.h" />
     <ClInclude Include="TerrainCreator.h" />
     <ClInclude Include="vertTable.h" />
   </ItemGroup>

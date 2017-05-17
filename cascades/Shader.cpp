@@ -157,7 +157,7 @@ void Shader::AttachShaderToProgram(const char* path, int ShaderType)
 	{
 		m_gs = shader;
 		const GLchar* feedbackVaryings[] = { "feedbackOut" };
-		glTransformFeedbackVaryings(m_program, 1, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
+		//glTransformFeedbackVaryings(m_program, 1, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
 	}
 	else if (ShaderType == GL_FRAGMENT_SHADER)
 	{
@@ -192,7 +192,7 @@ void Shader::LinkShader()
 	{
 		glGetProgramInfoLog(m_program, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-		std::cin.ignore();
+		//std::cin.ignore();
 	}
 
 	// Delete the shaders as they're linked into our program now and no longer necessary
