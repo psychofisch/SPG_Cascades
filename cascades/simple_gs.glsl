@@ -81,14 +81,17 @@ void buildTriangle(vec3 p0, vec3 p1, vec3 p2)
 
 	//gsDataOut.color = decideColor(p0);
 	gl_Position = gl_in[0].gl_Position + pv * vec4(p0, 1.0f);
+	gsDataOut.position = vDataIn[0].position + p0;
 	EmitVertex();
 	
 	//gsDataOut.color = decideColor(p1);
 	gl_Position = gl_in[0].gl_Position + pv * vec4(p1, 1.0f);
+	gsDataOut.position = vDataIn[0].position + p1;
 	EmitVertex();
 
 	//gsDataOut.color = decideColor(p2);
 	gl_Position = gl_in[0].gl_Position + pv * vec4(p2, 1.0f);
+	gsDataOut.position = vDataIn[0].position + p2;
 	EmitVertex();
 
 	EndPrimitive();

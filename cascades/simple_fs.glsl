@@ -27,7 +27,7 @@ void main()
 	vec3 yColorCode = vec3(0, 1.0, 0);
 	vec3 zColorCode = vec3(0, 0, 1.0);
 	
-	float scale = 0.01;
+	float scale = 0.1;
 	float colorFactor = 1.0;
 	
 	vec2 xCoords = dataIn.position.zy;
