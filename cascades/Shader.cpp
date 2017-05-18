@@ -199,6 +199,10 @@ void Shader::LinkShader()
 	glDeleteShader(m_vs);
 	glDeleteShader(m_gs);
 	glDeleteShader(m_fs);
+
+	m_vs = -1;
+	m_gs = -1;
+	m_fs = -1;
 }
 
 void Shader::checkCompileErrors(GLuint shader, std::string type)

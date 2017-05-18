@@ -311,6 +311,8 @@ ShaderManager * Renderer::getShaderManager()
 void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 {
 	m_shaderManager.UseShader(scene[0].shader);
+	glHandleError("IN RENDER SCENE");
+
 	GLuint shaderId = m_shaderManager.getGLIdById(scene[0].shader);
 	glUniformMatrix4fv(glGetUniformLocation(shaderId, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
 	glUniformMatrix4fv(glGetUniformLocation(shaderId, "view"), 1, GL_FALSE, glm::value_ptr(m_view));
