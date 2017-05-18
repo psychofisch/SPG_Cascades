@@ -11,7 +11,6 @@ Renderer::Renderer()
 	m_camera.position = glm::vec3(-14, 10, 28);
 }
 
-
 Renderer::~Renderer()
 {
 }
@@ -104,8 +103,15 @@ void Renderer::Run()
 	SOIL_free_image_data(image);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	//transform feedback
+	glGenBuffers(1, &m_transformFeedback);
+	glBindBuffer(GL_ARRAY_BUFFER, m_transformFeedback);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT) * 3 * m_scene[0].iCount, nullptr, GL_STATIC_READ);
+	GLfloat* transformFeedbackData = new GLfloat[sizeof(GL_FLOAT) * 3 * m_scene[0].iCount]{0};
+
 	mouse_callback(m_size.x/2, m_size.y/2);
 
+	bool transformFeedbackSwitch = true;
 	while (!glfwWindowShouldClose(m_window))
 	{
 		glGetError();
@@ -161,7 +167,27 @@ void Renderer::Run()
 		//glClearColor(0.69f, 0.69f, 0.69f, 1.0f);
 		glClearColor(0.f, 0.f, 0.f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		GLuint query;
+		glGenQueries(1, &query);
+
+		if (transformFeedbackSwitch)
+		{
+			glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
+			glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_transformFeedback);
+			glBeginTransformFeedback(GL_TRIANGLES);
+			glHandleError("post begin tranform feedback");
+		}
+
 		i_renderScene(m_scene.data(), m_scene.size());
+		glHandleError("post render scene");
+
+		if (transformFeedbackSwitch)
+		{
+			glEndTransformFeedback();
+			glHandleError("post end tranform feedback");
+			glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+		}
 
 		//render debug scene
 		/*if (m_debug)
@@ -177,8 +203,16 @@ void Renderer::Run()
 	
 		//swap buffers
 		glfwSwapBuffers(m_window);
-
 		glHandleError("post swap buffers");
+
+		if (transformFeedbackSwitch)
+		{
+			GLuint primitives;
+			glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
+			glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(transformFeedbackData), transformFeedbackData);
+			transformFeedbackSwitch = false;
+			glHandleError("post tranform feedback read");
+		}
 	}
 }
 

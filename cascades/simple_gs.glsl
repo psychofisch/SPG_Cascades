@@ -22,7 +22,7 @@ out Data{
 	mat4 pv;
 } gsDataOut;
 
-//out vec3 feedbackOut;
+out vec3 feedbackOut;
 
 const vec3 neighbours[8] = vec3[](
 	vec3(0, 0, 0),
@@ -83,6 +83,7 @@ void buildTriangle(vec3 points[3])
 	{
 		gl_Position = gl_in[0].gl_Position + pv * vec4(points[i], 1.0f);
 		gsDataOut.position = vDataIn[0].position + points[i];
+		feedbackOut = gsDataOut.position;
 		EmitVertex();
 	}
 

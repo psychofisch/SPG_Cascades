@@ -79,7 +79,8 @@ private:
 	GLuint m_terrainTexture,
 		m_vertTable,
 		m_edgeTable,
-		m_diffuseTexture;
+		m_diffuseTexture,
+		m_transformFeedback;
 
 	ShaderManager m_shaderManager;
 	void i_renderScene(Sceneobj* Scene, size_t size);

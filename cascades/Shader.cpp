@@ -157,7 +157,7 @@ void Shader::AttachShaderToProgram(const char* path, int ShaderType)
 	{
 		m_gs = shader;
 		const GLchar* feedbackVaryings[] = { "feedbackOut" };
-		//glTransformFeedbackVaryings(m_program, 1, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
+		glTransformFeedbackVaryings(m_program, 1, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
 	}
 	else if (ShaderType == GL_FRAGMENT_SHADER)
 	{
