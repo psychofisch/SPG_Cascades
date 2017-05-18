@@ -22,7 +22,7 @@ out Data{
 	mat4 pv;
 } gsDataOut;
 
-//out vec3 feedbackOut[15];
+//out vec3 feedbackOut;
 
 const vec3 neighbours[8] = vec3[](
 	vec3(0, 0, 0),
@@ -75,40 +75,32 @@ vec4 decideColor(int i)
 		return vec4(1.f, 1.f, 1.f, 1.f);
 }
 
-void buildTriangle(vec3 p0, vec3 p1, vec3 p2)
+void buildTriangle(vec3 points[3])
 {
 	mat4 pv = gsDataOut.pv;
 
-	//gsDataOut.color = decideColor(p0);
-	gl_Position = gl_in[0].gl_Position + pv * vec4(p0, 1.0f);
-	gsDataOut.position = vDataIn[0].position + p0;
-	EmitVertex();
-	
-	//gsDataOut.color = decideColor(p1);
-	gl_Position = gl_in[0].gl_Position + pv * vec4(p1, 1.0f);
-	gsDataOut.position = vDataIn[0].position + p1;
-	EmitVertex();
-
-	//gsDataOut.color = decideColor(p2);
-	gl_Position = gl_in[0].gl_Position + pv * vec4(p2, 1.0f);
-	gsDataOut.position = vDataIn[0].position + p2;
-	EmitVertex();
+	for(int i = 0; i < 3; i++)
+	{
+		gl_Position = gl_in[0].gl_Position + pv * vec4(points[i], 1.0f);
+		gsDataOut.position = vDataIn[0].position + points[i];
+		EmitVertex();
+	}
 
 	EndPrimitive();
 }
 
-vec3 calculateNormals(vec3 p1, vec3 p2, vec3 p3)
+vec3 calculateNormals(vec3 points[3])
 {
 	vec3 normal;
 
-	vec3 u = p2 - p1;
-	vec3 v = p3 - p1;
+	vec3 u = points[1] - points[0];
+	vec3 v = points[2] - points[0];
 
 	normal.x = (u.y * v.z) - (u.z * v.y);
 	normal.y = (u.z * v.x) - (u.x * v.z);
 	normal.z = (u.x * v.y) - (u.y * v.x);
 
-	return normalize(normal);
+	return -normalize(normal);
 }
 
 void main() {
@@ -143,16 +135,16 @@ void main() {
 	{
 		if (texture(vertTable, vec2(float(i) / 16, 1.0 - (float(lookupIndex) / 255))).r != -1)
 		{
-			int points[3];
-			points[0] = texture(vertTable, vec2(float(i) / 16, 1.0 - (float(lookupIndex) / 255))).r;
-			points[1] = texture(vertTable, vec2(float(i + 1) / 16, 1.0 - (float(lookupIndex) / 255))).r;
-			points[2] = texture(vertTable, vec2(float(i + 2) / 16, 1.0 - (float(lookupIndex) / 255))).r;
+			vec3 points[3];
+			points[0] = edges[texture(vertTable, vec2(float(i) / 16, 1.0 - (float(lookupIndex) / 255))).r];
+			points[1] = edges[texture(vertTable, vec2(float(i + 1) / 16, 1.0 - (float(lookupIndex) / 255))).r];
+			points[2] = edges[texture(vertTable, vec2(float(i + 2) / 16, 1.0 - (float(lookupIndex) / 255))).r];
 
 			gsDataOut.color = vec4(1.0f, 0, 0, 1.0f);
-			normals = calculateNormals(edges[points[2]], edges[points[1]], edges[points[0]]);//to fit the normal calculation
+			normals = calculateNormals(points);//to fit the normal calculation
 			gsDataOut.normal = normals;
 			gsDataOut.color = vec4(abs(normals), 1.0);
-			buildTriangle(edges[points[2]], edges[points[1]], edges[points[0]]);
+			buildTriangle(points);
 			// feedbackOut[i] = edges[points[2]];
 			// feedbackOut[i + 1] = edges[points[1]];
 			// feedbackOut[i + 2] = edges[points[0]];
