@@ -62,8 +62,6 @@ void Renderer::Run()
 	float lastframe = static_cast<float>(glfwGetTime());
 	m_dt = 0.014f;
 
-	glHandleError("pre edgeTable");
-
 	glGenTextures(1, &m_vertTable);
 	glBindTexture(GL_TEXTURE_2D, m_vertTable);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -71,7 +69,7 @@ void Renderer::Run()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 16, 256, 0, GL_RED_INTEGER, GL_INT, vertTable);
-	glHandleError("post vertable");
+	glHandleError(__FILE__, __LINE__);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	/*glGenTextures(1, &m_edgeTable);
@@ -171,6 +169,7 @@ void Renderer::Run()
 		GLuint query;
 		glGenQueries(1, &query);
 
+		m_shaderManager.UseShader(m_scene[0].shader);
 		if (transformFeedbackSwitch)
 		{
 			glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
@@ -209,8 +208,8 @@ void Renderer::Run()
 		{
 			GLuint primitives;
 			glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
-			glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(transformFeedbackData), transformFeedbackData);
-			transformFeedbackSwitch = false;
+			glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(GL_FLOAT) * 3 * m_scene[0].iCount, transformFeedbackData);
+			//transformFeedbackSwitch = false;
 			glHandleError("post tranform feedback read");
 		}
 	}
@@ -254,6 +253,7 @@ GLFWwindow * Renderer::createWindow(int width, int height)
 	glfwSwapInterval(1);
 
 	//i_generateNewFrameBuffer();
+	glHandleError(__FILE__, __LINE__);
 
 	return m_window;
 }
@@ -286,6 +286,7 @@ size_t Renderer::addObjectToScene(GLfloat * vertices, int vSize, GLuint* vao)
 	tmpObj.iCount = vSize;
 
 	m_scene.push_back(tmpObj);
+	glHandleError(__FILE__, __LINE__);
 
 	return m_scene.size() - 1;
 }
@@ -310,8 +311,8 @@ ShaderManager * Renderer::getShaderManager()
 
 void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 {
-	m_shaderManager.UseShader(scene[0].shader);
-	glHandleError("IN RENDER SCENE");
+	//m_shaderManager.UseShader(scene[0].shader);
+	glHandleError(__FILE__, __LINE__);
 
 	GLuint shaderId = m_shaderManager.getGLIdById(scene[0].shader);
 	glUniformMatrix4fv(glGetUniformLocation(shaderId, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
@@ -346,6 +347,8 @@ void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 		glDrawArrays(GL_POINTS, 0, scene[i].iCount);
 		glBindVertexArray(0);
 	}
+
+	glHandleError(__FILE__, __LINE__);
 }
 
 void Renderer::i_transformFeedback()
@@ -356,42 +359,4 @@ void Renderer::i_transformFeedback()
 void Renderer::setPerspective(float fovy, float aspect, float near, float far)
 {
 	m_projection = glm::perspective(fovy, aspect, near, far);
-}
-
-void glHandleError(const char* info)
-{
-	GLenum err = glGetError();
-
-	if (err != GL_NO_ERROR)
-	{
-		char* fill = "";
-		if (strlen(info) > 0)
-		{
-			std::cout << info << ":\n";
-			fill = "\t";
-		}
-
-		while (err != GL_NO_ERROR)
-		{
-			std::cout << fill;
-			switch (err)
-			{
-			case GL_INVALID_ENUM: std::cout << fill << "GL_INVALID_ENUM\n";
-				break;
-			case GL_INVALID_VALUE: std::cout << "GL_INVALID_VALUE\n";
-				break;
-			case GL_INVALID_OPERATION: std::cout << "GL_INVALID_OPERATION\n";
-				break;
-			case GL_INVALID_FRAMEBUFFER_OPERATION: std::cout << "GL_INVALID_FRAMEBUFFER_OPERATION\n";
-				break;
-			case GL_OUT_OF_MEMORY: std::cout << "GL_OUT_OF_MEMORY\n";
-				break;
-			case GL_STACK_UNDERFLOW: std::cout << "GL_STACK_UNDERFLOW\n";
-				break;
-			case GL_STACK_OVERFLOW: std::cout << "GL_STACK_OVERFLOW\n";
-				break;
-			}
-			err = glGetError();
-		}
-	}
 }

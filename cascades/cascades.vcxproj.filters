@@ -68,6 +68,9 @@
     <ClInclude Include="SOIL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="glHandleError.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="simple_fs.hlsl">

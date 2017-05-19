@@ -144,9 +144,11 @@ void Shader::AttachShaderToProgram(const char* path, int ShaderType)
 		std::cin.ignore();
 		exit(13);
 	}
+	glHandleError(__FILE__, __LINE__);
 
 	// Shader Program
-	glUseProgram(m_program);
+	//glUseProgram(m_program);
+	glHandleError(__FILE__, __LINE__);
 	glAttachShader(m_program, shader);
 
 	if (ShaderType == GL_VERTEX_SHADER)
@@ -176,6 +178,7 @@ void Shader::AttachShaderToProgram(const char* path, int ShaderType)
 
 	//// Delete the shaders as they're linked into our program now and no longer necessary
 	//glDeleteShader(shader);
+	glHandleError(__FILE__, __LINE__);
 }
 
 void Shader::LinkShader()
@@ -203,6 +206,8 @@ void Shader::LinkShader()
 	m_vs = -1;
 	m_gs = -1;
 	m_fs = -1;
+
+	glHandleError(__FILE__, __LINE__);
 }
 
 void Shader::checkCompileErrors(GLuint shader, std::string type)
@@ -227,10 +232,13 @@ void Shader::checkCompileErrors(GLuint shader, std::string type)
 			std::cout << "| ERROR::::PROGRAM-LINKING-ERROR of type: " << type << "|\n" << infoLog << "\n| -- --------------------------------------------------- -- |" << std::endl;
 		}
 	}
+
+	glHandleError(__FUNCTION__, __LINE__);
 }
 
 // Uses the current shader
 void Shader::Use()
 {
 	glUseProgram(m_program);
+	glHandleError(__FILE__, __LINE__);
 }

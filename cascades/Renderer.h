@@ -15,6 +15,7 @@
 
 #include "SOIL.h"
 
+#include "glHandleError.h"
 #include "Camera.h"
 #include "ShaderManager.h"
 #include "TerrainCreator.h"
@@ -22,6 +23,7 @@
 #include "edgeTable.h"
 
 void glHandleError(const char* info);
+void glHandleError(const char* file, int line);
 
 struct Sceneobj {
 	GLuint VAO;

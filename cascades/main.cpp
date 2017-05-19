@@ -72,6 +72,8 @@ void main(int agrc, char* argv[])
 	renderer.getObjectById(objId)->iCount = vSize / 3;
 	renderer.getObjectById(objId)->texture = densityTexture;
 
+	glHandleError(__FILE__, __LINE__);
+
 	renderer.Run();
 	
 	glfwTerminate();
