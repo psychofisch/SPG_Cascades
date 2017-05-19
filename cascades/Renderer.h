@@ -71,7 +71,8 @@ private:
 	glm::ivec2 m_size;
 	Camera m_camera;
 	glm::vec2 m_mouse;
-	bool m_debug;
+	bool m_debug,
+		m_transformFeedbackSwitch;
 	std::vector<Sceneobj> m_scene;
 	float m_dt;
 	GLfloat m_nearPlane, m_farPlane, m_densityThreshold;
@@ -81,10 +82,10 @@ private:
 	GLuint m_terrainTexture,
 		m_vertTable,
 		m_edgeTable,
-		m_diffuseTexture,
-		m_transformFeedback;
-
+		m_diffuseTexture;
 	ShaderManager m_shaderManager;
+
 	void i_renderScene(Sceneobj* Scene, size_t size);
+	void i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_t shaderManagerId);
 	void i_transformFeedback();
 };

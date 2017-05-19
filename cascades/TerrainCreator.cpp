@@ -1,6 +1,10 @@
 #include "TerrainCreator.h"
 
 TerrainCreator::TerrainCreator(int width, int height, int depth, int seed)
+	:m_cubeData(nullptr),
+	m_terrainPlainBuffer(UINT_MAX),
+	m_terrainFeedBackVAO(UINT_MAX),
+	m_capturedPrimitives(0)
 {
 	m_size = width * height * depth;
 	m_terrain = new float[m_size]{0.0f};
@@ -12,6 +16,7 @@ TerrainCreator::~TerrainCreator()
 {
 	delete m_rng;
 	delete[] m_terrain;
+	delete[] m_terrainFeedbackData;
 }
 
 float* TerrainCreator::getTerrainData()
@@ -28,7 +33,7 @@ int TerrainCreator::getNumberOfVertices(bool cube)
 {
 	if (cube)
 	{
-		return m_size * 3;
+		return m_size;
 	}
 
 	int vSize = 0;
@@ -64,9 +69,113 @@ void TerrainCreator::getVertices(GLfloat* verticesOut, bool cube)
 	}
 }
 
+GLfloat* TerrainCreator::getCubeVertices()
+{
+	if (m_cubeData == nullptr)
+	{
+		m_cubeData = new GLfloat[m_size * 3];
+		getVertices(m_cubeData, true);
+	}
+
+	return m_cubeData;
+}
+
 TerrainCreator::vec3i TerrainCreator::getDimensions()
 {
 	return m_dimension;
+}
+
+GLuint TerrainCreator::getCubeBuffer()
+{
+	if (m_terrainPlainBuffer == UINT_MAX)
+	{
+		GLuint vbo;
+
+		glGenVertexArrays(1, &m_terrainPlainBuffer);
+		glBindVertexArray(m_terrainPlainBuffer);
+
+		//VBO
+		glGenBuffers(1, &vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, getNumberOfVertices(true) * sizeof(GLfloat) * 3, getCubeVertices(), GL_STATIC_DRAW);
+
+		// Position attribute
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
+		//CLEANUP
+		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	return m_terrainPlainBuffer;
+}
+
+GLuint TerrainCreator::getFeedbackBuffer()
+{
+	return m_terrainFeedbackBuffer;
+}
+
+size_t TerrainCreator::getFeedbackSize()
+{
+	return m_feedbackDataSize;
+}
+
+GLfloat * TerrainCreator::feedbackDataPtr()
+{
+	return m_terrainFeedbackData;
+}
+
+GLuint TerrainCreator::feedbackToVAO(size_t capturedPrimitives)
+{
+	m_capturedPrimitives = capturedPrimitives;
+
+	if (m_terrainFeedBackVAO != UINT_MAX)
+	{
+		glDeleteBuffers(1, &m_terrainFeedBackVAO);
+		glDeleteBuffers(1, &m_feedbackVBO);
+	}
+
+	glGenVertexArrays(1, &m_terrainFeedBackVAO);
+	glBindVertexArray(m_terrainFeedBackVAO);
+
+	//VBO
+	glGenBuffers(1, &m_feedbackVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_feedbackVBO);
+	glBufferData(GL_ARRAY_BUFFER, capturedPrimitives * sizeof(GLfloat) * 6 * 3, m_terrainFeedbackData, GL_STATIC_DRAW);
+
+	// Position attribute
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+
+	// Normal attribute
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+
+	//CLEANUP
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	return m_terrainFeedBackVAO;
+}
+
+GLuint TerrainCreator::getFeedbackVAO()
+{
+	return m_terrainFeedBackVAO;
+}
+
+GLuint TerrainCreator::getVAOSize()
+{
+	return m_capturedPrimitives * 6 * 3;
+}
+
+void TerrainCreator::initFeedback()
+{
+	m_feedbackDataSize = sizeof(GL_FLOAT) * 6 * m_size * 3;
+	glGenBuffers(1, &m_terrainFeedbackBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, m_terrainFeedbackBuffer);
+	glBufferData(GL_ARRAY_BUFFER, m_feedbackDataSize, nullptr, GL_STATIC_READ);
+	m_terrainFeedbackData = new GLfloat[m_feedbackDataSize]{ 0 };
 }
 
 float* TerrainCreator::createTerrain()
@@ -83,7 +192,7 @@ float* TerrainCreator::createTerrain()
 #pragma omp parallel for
 		for (int y = 0; y < m_dimension.y; ++y)
 		{
-			float sinAdd = glm::sin(y/4);
+			float sinAdd = glm::sin(y/4) * 0.2f;
 			for (uint z = 0; z < m_dimension.z; ++z)
 			{
 				for (uint x = 0; x < m_dimension.x; ++x)

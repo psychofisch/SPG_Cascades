@@ -4,7 +4,8 @@
 
 Renderer::Renderer()
 	:m_debug(true),
-	m_densityThreshold(4.f)
+	m_densityThreshold(4.f),
+	m_transformFeedbackSwitch(true)
 {
 	m_camera.nearPlane = 0.1f;
 	m_camera.farPlane = 1000.0f;
@@ -31,13 +32,17 @@ void Renderer::key_callback(int key, int action)
 			glBindTexture(GL_TEXTURE_3D, m_terrainTexture);
 			glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, m_terrainCreator->getDimensions().x, m_terrainCreator->getDimensions().y, m_terrainCreator->getDimensions().z, 0, GL_RED, GL_FLOAT, m_terrainCreator->getTerrainData());
 			glBindTexture(GL_TEXTURE_3D, 0);
+			m_transformFeedbackSwitch = true;
 			break;
 		case GLFW_KEY_C:
 			m_shaderManager.clearShader(0);
-			m_shaderManager.attachShaderToProgram(0, "simple_vs.glsl", GL_VERTEX_SHADER);
-			m_shaderManager.attachShaderToProgram(0, "simple_fs.glsl", GL_FRAGMENT_SHADER);
-			m_shaderManager.attachShaderToProgram(0, "simple_gs.glsl", GL_GEOMETRY_SHADER);
+			m_shaderManager.attachShaderToProgram(0, "terrain_vs.glsl", GL_VERTEX_SHADER);
+			m_shaderManager.attachShaderToProgram(0, "terrain_fs.glsl", GL_FRAGMENT_SHADER);
+			m_shaderManager.attachShaderToProgram(0, "terrain_gs.glsl", GL_GEOMETRY_SHADER);
 			m_shaderManager.LinkShader(0);
+			break;
+		case GLFW_KEY_R:
+			m_transformFeedbackSwitch = true;
 			break;
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
@@ -102,14 +107,15 @@ void Renderer::Run()
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	//transform feedback
+	/*size_t transformDataSize = sizeof(GL_FLOAT) * 6 * m_scene[0].iCount * 3;
 	glGenBuffers(1, &m_transformFeedback);
 	glBindBuffer(GL_ARRAY_BUFFER, m_transformFeedback);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GL_FLOAT) * 3 * m_scene[0].iCount, nullptr, GL_STATIC_READ);
-	GLfloat* transformFeedbackData = new GLfloat[sizeof(GL_FLOAT) * 3 * m_scene[0].iCount]{0};
+	glBufferData(GL_ARRAY_BUFFER, transformDataSize, nullptr, GL_STATIC_READ);
+	GLfloat* transformFeedbackData = new GLfloat[transformDataSize]{0};*/
+	m_terrainCreator->initFeedback();
 
 	mouse_callback(m_size.x/2, m_size.y/2);
 
-	bool transformFeedbackSwitch = true;
 	while (!glfwWindowShouldClose(m_window))
 	{
 		glGetError();
@@ -144,9 +150,15 @@ void Renderer::Run()
 			m_camera.position += sideVec * m_camera.rotation;
 
 		if (glfwGetKey(m_window, GLFW_KEY_Q) == GLFW_PRESS)
+		{
 			m_densityThreshold += (1.0f * m_dt);
+			m_transformFeedbackSwitch = true;
+		}
 		else if (glfwGetKey(m_window, GLFW_KEY_E) == GLFW_PRESS)
+		{
 			m_densityThreshold -= (1.0f * m_dt);
+			m_transformFeedbackSwitch = true;
+		}
 
 		glm::clamp(m_densityThreshold, 0.f, 100.f);
 
@@ -169,23 +181,25 @@ void Renderer::Run()
 		GLuint query;
 		glGenQueries(1, &query);
 
-		m_shaderManager.UseShader(m_scene[0].shader);
-		if (transformFeedbackSwitch)
+		if (m_transformFeedbackSwitch)
 		{
+			m_shaderManager.UseShader(0);
 			glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
-			glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_transformFeedback);
+			glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_terrainCreator->getFeedbackBuffer());
 			glBeginTransformFeedback(GL_TRIANGLES);
 			glHandleError("post begin tranform feedback");
-		}
 
-		i_renderScene(m_scene.data(), m_scene.size());
-		glHandleError("post render scene");
+			//i_renderScene(m_scene.data(), m_scene.size());
+			i_renderArray(m_terrainCreator->getCubeBuffer(), m_terrainCreator->getNumberOfVertices(true) * 3, GL_POINTS, 0);
 
-		if (transformFeedbackSwitch)
-		{
 			glEndTransformFeedback();
 			glHandleError("post end tranform feedback");
 			glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+		}
+		else
+		{
+			m_shaderManager.UseShader(1);
+			i_renderArray(m_terrainCreator->getFeedbackVAO(), m_terrainCreator->getVAOSize(), GL_TRIANGLES, 1);
 		}
 
 		//render debug scene
@@ -204,12 +218,14 @@ void Renderer::Run()
 		glfwSwapBuffers(m_window);
 		glHandleError("post swap buffers");
 
-		if (transformFeedbackSwitch)
+		if (m_transformFeedbackSwitch)
 		{
 			GLuint primitives;
 			glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
-			glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(GL_FLOAT) * 3 * m_scene[0].iCount, transformFeedbackData);
-			//transformFeedbackSwitch = false;
+			glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_terrainCreator->getFeedbackSize(), m_terrainCreator->feedbackDataPtr());
+			m_terrainCreator->feedbackToVAO(primitives);
+			m_transformFeedbackSwitch = false;
+			std::cout << primitives << " primitives captured\n";
 			glHandleError("post tranform feedback read");
 		}
 	}
@@ -236,6 +252,8 @@ GLFWwindow * Renderer::createWindow(int width, int height)
 
 	glewExperimental = GL_TRUE;
 	glewInit();
+	glHandleError(__FILE__, __LINE__);
+
 	if (glewInit() != GLEW_OK)
 	{
 		std::cout << "Failed to initialize GLEW" << std::endl;
@@ -312,7 +330,7 @@ ShaderManager * Renderer::getShaderManager()
 void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 {
 	//m_shaderManager.UseShader(scene[0].shader);
-	glHandleError(__FILE__, __LINE__);
+	//glHandleError(__FILE__, __LINE__);
 
 	GLuint shaderId = m_shaderManager.getGLIdById(scene[0].shader);
 	glUniformMatrix4fv(glGetUniformLocation(shaderId, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
@@ -340,13 +358,55 @@ void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 	for (int i = 0; i < size; ++i)
 	{
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_3D, scene[i].texture);
+		glBindTexture(GL_TEXTURE_3D, m_terrainTexture);
 		glUniform1i(glGetUniformLocation(shaderId, "densityMap"), 1);
 
 		glBindVertexArray(scene[i].VAO);
 		glDrawArrays(GL_POINTS, 0, scene[i].iCount);
 		glBindVertexArray(0);
 	}
+
+	glHandleError(__FILE__, __LINE__);
+}
+
+void Renderer::i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_t shaderManagerId)
+{
+	GLuint shaderId = m_shaderManager.getGLIdById(shaderManagerId);
+
+	if (shaderManagerId == 0) //feedback Shader
+	{
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_vertTable);
+		glUniform1i(glGetUniformLocation(shaderId, "vertTable"), 0);
+
+		glUniform1f(glGetUniformLocation(shaderId, "densityThreshold"), m_densityThreshold);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_3D, m_terrainTexture);
+		glUniform1i(glGetUniformLocation(shaderId, "densityMap"), 1);
+	}
+
+	glUniformMatrix4fv(glGetUniformLocation(shaderId, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
+	glUniformMatrix4fv(glGetUniformLocation(shaderId, "view"), 1, GL_FALSE, glm::value_ptr(m_view));
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_diffuseTexture);
+	glUniform1i(glGetUniformLocation(shaderId, "diffuseTexture"), 1);
+
+	/*glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_1D, m_edgeTable);
+	glUniform1i(glGetUniformLocation(shaderId, "edgeTable"), 2);*/
+	//glUniform1iv(glGetUniformLocation(shaderId, "edgeTable"), 256, edgeTable);
+
+	glUniform3f(glGetUniformLocation(shaderId, "lightPos"), m_camera.position.x, m_camera.position.y, m_camera.position.z);
+	//glUniform3f(glGetUniformLocation(shaderId, "lightPos"), 0, 0, 0);
+	glUniform3f(glGetUniformLocation(shaderId, "cameraPos"), m_camera.position.x, m_camera.position.y, m_camera.position.z);
+
+	glHandleError(__FILE__, __LINE__);
+
+	glBindVertexArray(VAO);
+	glDrawArrays(glDrawMode, 0, arraySize);
+	glBindVertexArray(0);
 
 	glHandleError(__FILE__, __LINE__);
 }

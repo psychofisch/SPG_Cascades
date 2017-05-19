@@ -8,6 +8,9 @@
 #include <GL/glew.h>
 
 Shader::Shader()
+	:m_vs(-1),
+	m_gs(-1),
+	m_fs(-1)
 {
 	m_program = glCreateProgram();
 }
@@ -158,8 +161,8 @@ void Shader::AttachShaderToProgram(const char* path, int ShaderType)
 	else if (ShaderType == GL_GEOMETRY_SHADER)
 	{
 		m_gs = shader;
-		const GLchar* feedbackVaryings[] = { "feedbackOut" };
-		glTransformFeedbackVaryings(m_program, 1, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
+		const GLchar* feedbackVaryings[] = { "feedbackBlock.position", "feedbackBlock.normals" };
+		glTransformFeedbackVaryings(m_program, 2, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
 	}
 	else if (ShaderType == GL_FRAGMENT_SHADER)
 	{
@@ -199,9 +202,14 @@ void Shader::LinkShader()
 	}
 
 	// Delete the shaders as they're linked into our program now and no longer necessary
-	glDeleteShader(m_vs);
-	glDeleteShader(m_gs);
-	glDeleteShader(m_fs);
+	if(m_vs != -1)
+		glDeleteShader(m_vs);
+
+	if (m_gs != -1)
+		glDeleteShader(m_gs);
+
+	if (m_fs != -1)
+		glDeleteShader(m_fs);
 
 	m_vs = -1;
 	m_gs = -1;

@@ -1,18 +1,11 @@
 #version 440 core
 out vec4 fragColor;
 
-// in Data{
-	// vec3 position;
-	// vec3 normal;
-	// vec4 color;
-	// mat4 pv;
-// } dataIn;
-
-in vData{
-	mat4 p;
-	mat4 v;
+in Data{
 	vec3 position;
 	vec3 normal;
+	vec4 color;
+	mat4 pv;
 } dataIn;
 
 uniform vec3 lightPos;

@@ -39,7 +39,7 @@ void main(int agrc, char* argv[])
 	terrain.createTerrain();
 
 	int vSize = terrain.getNumberOfVertices(true);
-	GLfloat* vData = new GLfloat[vSize];
+	GLfloat* vData = new GLfloat[vSize * 3];
 	terrain.getVertices(vData, true);
 
 	GLuint vao;
@@ -62,13 +62,18 @@ void main(int agrc, char* argv[])
 	renderer.setTerrainCreatorPtr(&terrain, densityTexture);
 
 	ShaderManager* sM = renderer.getShaderManager();
+	size_t terrainShader = sM->createNewShader();
+	sM->attachShaderToProgram(terrainShader, "terrain_vs.glsl", GL_VERTEX_SHADER);
+	sM->attachShaderToProgram(terrainShader, "terrain_gs.glsl", GL_GEOMETRY_SHADER);
+	sM->attachShaderToProgram(terrainShader, "terrain_fs.glsl", GL_FRAGMENT_SHADER);
+	sM->LinkShader(terrainShader);
+
 	size_t mainShader = sM->createNewShader();
 	sM->attachShaderToProgram(mainShader, "simple_vs.glsl", GL_VERTEX_SHADER);
-	sM->attachShaderToProgram(mainShader, "simple_gs.glsl", GL_GEOMETRY_SHADER);
 	sM->attachShaderToProgram(mainShader, "simple_fs.glsl", GL_FRAGMENT_SHADER);
 	sM->LinkShader(mainShader);
 
-	renderer.getObjectById(objId)->shader = mainShader;
+	renderer.getObjectById(objId)->shader = terrainShader;
 	renderer.getObjectById(objId)->iCount = vSize / 3;
 	renderer.getObjectById(objId)->texture = densityTexture;
 

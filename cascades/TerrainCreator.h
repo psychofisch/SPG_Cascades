@@ -40,7 +40,16 @@ public:
 	float getTerrainDataAt(vec3i position);
 	int getNumberOfVertices(bool cube = false);
 	void getVertices(GLfloat* verticesOut, bool cube = false);
+	GLfloat* getCubeVertices();
 	vec3i getDimensions();
+	GLuint getCubeBuffer();
+	GLuint getFeedbackBuffer();
+	size_t getFeedbackSize();
+	GLfloat* feedbackDataPtr();
+	GLuint feedbackToVAO(size_t capturedPrimitives);
+	GLuint getFeedbackVAO();
+	GLuint getVAOSize();
+	void initFeedback();
 
 	float* createTerrain();
 
@@ -50,5 +59,13 @@ private:
 	vec3i m_dimension;
 	size_t m_size;
 	RNGesus* m_rng;
+	GLuint m_terrainPlainBuffer,
+		m_terrainFeedbackBuffer,
+		m_terrainFeedBackVAO,
+		m_feedbackVBO;
+	GLfloat* m_terrainFeedbackData;
+	GLfloat* m_cubeData;
+	size_t m_feedbackDataSize,
+		m_capturedPrimitives;
 };
 
