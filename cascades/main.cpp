@@ -11,6 +11,7 @@
 Renderer* global_engine_ptr = nullptr;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
 void main(int agrc, char* argv[])
 {
@@ -21,6 +22,7 @@ void main(int agrc, char* argv[])
 	//bind key callback method
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
 	renderer.setPerspective(70.0f, (GLfloat)1280 / (GLfloat)720, 0.1f, 500.0f);
 
@@ -100,4 +102,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	global_engine_ptr->mouse_callback(xpos, ypos);
+}
+
+void mouse_button_callback(GLFWwindow * window, int button, int action, int mods)
+{
+	global_engine_ptr->mouse_button_callback(button, action);
 }

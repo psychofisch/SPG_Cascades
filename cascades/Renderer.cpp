@@ -76,6 +76,59 @@ void Renderer::mouse_callback(double xpos, double ypos)
 	m_mouse.y = ypos;
 }
 
+void Renderer::mouse_button_callback(int button, int action)
+{
+	if (action == GLFW_PRESS)
+	{
+		switch (button)
+		{
+		case GLFW_MOUSE_BUTTON_LEFT:
+			std::cout << "click!\n";
+
+			std::cout << "Camera Position: " << m_camera.position.x << "|" << m_camera.position.y << "|" << m_camera.position.z << std::endl;
+			std::cout << m_camera.rotation.y << "|" << m_camera.rotation.y << "|" << m_camera.rotation.z << std::endl;
+			glm::vec3 rayRay = glm::vec3(0, 0, -1.f) * m_camera.rotation;
+			//addLine(m_camera.position, rayRay);
+
+			GLfloat* data = m_terrainCreator->feedbackDataPtr();
+			GLuint dataSize = m_terrainCreator->getVAOSize();
+
+			int closestT = -1;
+			float closest = HUGE_VALF;
+			glm::vec3 triangle[3];
+			for (int i = 0; i < dataSize; i += 18)
+			{
+				for (int j = 0; j < 3; ++j)
+				{
+					triangle[j].x = data[(j * 6) + i];
+					triangle[j].y = data[(j * 6) + i + 1];
+					triangle[j].z = data[(j * 6) + i + 2];
+				}
+				
+				float hit = triangleHit(triangle, m_camera.position, rayRay, 100.f);
+				if (hit > 0.f)
+				{
+					if (hit < closest)
+					{
+						closest = hit;
+						closestT = i;
+					}
+				}
+			}
+
+			if (closestT > 0)
+			{
+				//addHit(m_camera.position + (rayRay * closest), .1f);
+				//addLine(m_camera.position, rayRay, closest);
+				std::cout << "HIT@" << closest << "Index: " << closestT << std::endl;
+			}
+			else
+				std::cout << "MISS\n";
+			break;
+		}
+	}
+}
+
 void Renderer::Run()
 {
 	float lastframe = static_cast<float>(glfwGetTime());
@@ -449,4 +502,44 @@ void Renderer::i_transformFeedback()
 void Renderer::setPerspective(float fovy, float aspect, float near, float far)
 {
 	m_projection = glm::perspective(fovy, aspect, near, far);
+}
+
+//statics
+float Renderer::triangleHit(glm::vec3* triangle, glm::vec3 rOrigin, glm::vec3 rDirection, float length)
+{
+	glm::vec3 e1, e2, h, s, q;
+	float a, f, u, v, t;
+
+	e1 = triangle[1] - triangle[0];
+	e2 = triangle[2] - triangle[0];
+
+	h = glm::cross(rDirection, e2);
+	a = glm::dot(e1, h);
+
+	if (a > -0.00001 && a < 0.00001)
+		return(false);
+
+	f = 1 / a;
+	s = rOrigin - triangle[0];
+	u = f * (glm::dot(s, h));
+
+	if (u < 0.0 || u > 1.0)
+		return(false);
+
+	q = glm::cross(s, e1);
+	v = f * glm::dot(rDirection, q);
+
+	if (v < 0.0 || u + v > 1.0)
+		return(false);
+
+	// at this stage we can compute t to find out where
+	// the intersection point is on the line
+	t = f * glm::dot(e2, q);
+
+	if (t > 0.f && t < length)
+	{
+		return t;
+	}
+
+	return -1.f;
 }

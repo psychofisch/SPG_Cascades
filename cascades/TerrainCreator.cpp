@@ -73,7 +73,7 @@ GLfloat* TerrainCreator::getCubeVertices()
 {
 	if (m_cubeData == nullptr)
 	{
-		std::cout << __FUNCTION__ << ": generating m_cubeData (" << m_size * 3 * sizeof(GLfloat) << " Byte)\n";
+		std::cout << __FUNCTION__ << ": generating m_cubeData (" << m_size * sizeof(GLfloat) << " KByte)\n";
 		m_cubeData = new GLfloat[m_size * 3];
 		getVertices(m_cubeData, true);
 	}
@@ -108,7 +108,7 @@ GLuint TerrainCreator::getCubeBuffer()
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		std::cout << __FUNCTION__ << ": generating m_terrainPlainBuffer on GPU (" << getNumberOfVertices(true) * sizeof(GLfloat) * 3 << " Byte)\n";
+		std::cout << __FUNCTION__ << ": generating m_terrainPlainBuffer on GPU (" << getNumberOfVertices(true) * sizeof(GLfloat) << " KByte)\n";
 	}
 
 	return m_terrainPlainBuffer;
@@ -180,7 +180,7 @@ void TerrainCreator::initFeedback()
 	glBufferData(GL_ARRAY_BUFFER, m_feedbackDataSize, nullptr, GL_STATIC_READ);
 	m_terrainFeedbackData = new GLfloat[m_feedbackDataSize]{ 0 };
 
-	std::cout << __FUNCTION__ << ": generating m_feedbackBuffer and m_terrainFeedbackData (" << m_feedbackDataSize << " Byte)\n";
+	std::cout << __FUNCTION__ << ": generating m_feedbackBuffer and m_terrainFeedbackData (" << m_feedbackDataSize/3 << " KByte)\n";
 }
 
 float* TerrainCreator::createTerrain()
@@ -194,14 +194,19 @@ float* TerrainCreator::createTerrain()
 		pillars[1] = glm::vec3(m_dimension.x * m_rng->getZeroToOne(), m_dimension.y * m_rng->getZeroToOne(), m_dimension.z * m_rng->getZeroToOne());
 		pillars[2] = glm::vec3(m_dimension.x * m_rng->getZeroToOne(), m_dimension.y * m_rng->getZeroToOne(), m_dimension.z * m_rng->getZeroToOne());
 		
+		float zCenter = m_dimension.z * 0.5f;
+		float xCenter = m_dimension.x * 0.5f;
+
 #pragma omp parallel for
 		for (int y = 0; y < m_dimension.y; ++y)
 		{
-			float sinAdd = glm::sin(y/4) * 0.2f;
+			float sinAdd = glm::sin(float(y) / m_dimension.y * 20) * 1.f;
 			for (uint z = 0; z < m_dimension.z; ++z)
 			{
+				float zDistance2Wall = glm::abs(zCenter - z) / m_dimension.z;
 				for (uint x = 0; x < m_dimension.x; ++x)
 				{
+					float xDistance2Wall = glm::abs(xCenter - x) / m_dimension.x;
 					uint pos = x + y*m_dimension.x + z*(m_dimension.y * m_dimension.x);
 					glm::vec3 tmpVec(x, y, z);
 					glm::vec3 pillarVec[3];
@@ -212,7 +217,7 @@ float* TerrainCreator::createTerrain()
 					f += diagonal / glm::length(pillarVec[1]);
 					f += diagonal / glm::length(pillarVec[2]);
 					f *= 0.3f;
-					m_terrain[pos] = f + sinAdd;
+					m_terrain[pos] = f + sinAdd - zDistance2Wall - xDistance2Wall;
 					//if (f > 4.f)
 					//{
 					//	m_terrain[pos] = 1.0f;

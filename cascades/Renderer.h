@@ -55,6 +55,7 @@ public:
 	//callbacks
 	void key_callback(int key, int action);
 	void mouse_callback(double xpos, double ypos);
+	void mouse_button_callback(int button, int action);
 
 	void Run();
 
@@ -65,6 +66,9 @@ public:
 	void setTerrainCreatorPtr(TerrainCreator* tcPtr, GLuint textureId);
 
 	ShaderManager* getShaderManager();
+
+	//statics
+	static float triangleHit(glm::vec3* triangle, glm::vec3 rOrigin, glm::vec3 rDirection, float length); //triangle: pointer to 3 glm::vec3
 
 private:
 	GLFWwindow* m_window;
