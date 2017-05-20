@@ -72,7 +72,8 @@ private:
 	Camera m_camera;
 	glm::vec2 m_mouse;
 	bool m_debug,
-		m_transformFeedbackSwitch;
+		m_transformFeedbackSwitch,
+		m_saveTransformFeedback;
 	std::vector<Sceneobj> m_scene;
 	float m_dt;
 	GLfloat m_nearPlane, m_farPlane, m_densityThreshold;

@@ -5,7 +5,8 @@
 Renderer::Renderer()
 	:m_debug(true),
 	m_densityThreshold(4.f),
-	m_transformFeedbackSwitch(true)
+	m_transformFeedbackSwitch(true),
+	m_saveTransformFeedback(true)
 {
 	m_camera.nearPlane = 0.1f;
 	m_camera.farPlane = 1000.0f;
@@ -46,6 +47,19 @@ void Renderer::key_callback(int key, int action)
 			break;
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
+			break;
+		}
+	}
+
+	if (action == GLFW_RELEASE)
+	{
+		switch (key)
+		{
+		case GLFW_KEY_Q:
+		case GLFW_KEY_E:
+		case GLFW_KEY_T:
+		case GLFW_KEY_R:
+			m_saveTransformFeedback = true;
 			break;
 		}
 	}
@@ -184,17 +198,23 @@ void Renderer::Run()
 		if (m_transformFeedbackSwitch)
 		{
 			m_shaderManager.UseShader(0);
-			glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
-			glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_terrainCreator->getFeedbackBuffer());
-			glBeginTransformFeedback(GL_TRIANGLES);
-			glHandleError("post begin tranform feedback");
+			if (m_saveTransformFeedback)
+			{
+				glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
+				glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_terrainCreator->getFeedbackBuffer());
+				glBeginTransformFeedback(GL_TRIANGLES);
+				glHandleError("post begin tranform feedback");
+			}
 
 			//i_renderScene(m_scene.data(), m_scene.size());
 			i_renderArray(m_terrainCreator->getCubeBuffer(), m_terrainCreator->getNumberOfVertices(true) * 3, GL_POINTS, 0);
 
-			glEndTransformFeedback();
-			glHandleError("post end tranform feedback");
-			glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+			if (m_saveTransformFeedback)
+			{
+				glEndTransformFeedback();
+				glHandleError("post end tranform feedback");
+				glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+			}
 		}
 		else
 		{
@@ -220,14 +240,22 @@ void Renderer::Run()
 
 		if (m_transformFeedbackSwitch)
 		{
-			GLuint primitives;
-			glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
-			glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_terrainCreator->getFeedbackSize(), m_terrainCreator->feedbackDataPtr());
-			m_terrainCreator->feedbackToVAO(primitives);
 			m_transformFeedbackSwitch = false;
-			std::cout << primitives << " primitives captured\n";
-			glHandleError("post tranform feedback read");
+
+			if (m_saveTransformFeedback)
+			{
+				GLuint primitives;
+				glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
+				glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_terrainCreator->getFeedbackSize(), m_terrainCreator->feedbackDataPtr());
+				m_terrainCreator->feedbackToVAO(primitives);
+				//m_transformFeedbackSwitch = false;
+				std::cout << primitives << " primitives captured\n";
+				glHandleError("post tranform feedback read");
+				m_saveTransformFeedback = false;
+			}
 		}
+
+		glDeleteQueries(1, &query);
 	}
 }
 
@@ -384,6 +412,8 @@ void Renderer::i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_3D, m_terrainTexture);
 		glUniform1i(glGetUniformLocation(shaderId, "densityMap"), 1);
+
+		glHandleError(__FILE__, __LINE__);
 	}
 
 	glUniformMatrix4fv(glGetUniformLocation(shaderId, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));

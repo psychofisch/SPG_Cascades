@@ -73,6 +73,7 @@ GLfloat* TerrainCreator::getCubeVertices()
 {
 	if (m_cubeData == nullptr)
 	{
+		std::cout << __FUNCTION__ << ": generating m_cubeData (" << m_size * 3 * sizeof(GLfloat) << " Byte)\n";
 		m_cubeData = new GLfloat[m_size * 3];
 		getVertices(m_cubeData, true);
 	}
@@ -106,6 +107,8 @@ GLuint TerrainCreator::getCubeBuffer()
 		//CLEANUP
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		std::cout << __FUNCTION__ << ": generating m_terrainPlainBuffer on GPU (" << getNumberOfVertices(true) * sizeof(GLfloat) * 3 << " Byte)\n";
 	}
 
 	return m_terrainPlainBuffer;
@@ -176,6 +179,8 @@ void TerrainCreator::initFeedback()
 	glBindBuffer(GL_ARRAY_BUFFER, m_terrainFeedbackBuffer);
 	glBufferData(GL_ARRAY_BUFFER, m_feedbackDataSize, nullptr, GL_STATIC_READ);
 	m_terrainFeedbackData = new GLfloat[m_feedbackDataSize]{ 0 };
+
+	std::cout << __FUNCTION__ << ": generating m_feedbackBuffer and m_terrainFeedbackData (" << m_feedbackDataSize << " Byte)\n";
 }
 
 float* TerrainCreator::createTerrain()
