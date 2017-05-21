@@ -7,8 +7,8 @@ uniform float maxLifetime;
 
 void main()
 {
-	if(pLifetime > maxLifetime)
-		discard;
+	// if(pLifetime <= 0.0f)
+		// discard;
 		
 	fragColor = vec4(1.f);
 }

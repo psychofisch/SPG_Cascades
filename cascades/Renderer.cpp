@@ -121,7 +121,7 @@ void Renderer::mouse_button_callback(int button, int action)
 				//addHit(m_camera.position + (rayRay * closest), .1f);
 				//addLine(m_camera.position, rayRay, closest);
 				std::cout << "HIT@" << closest << "Index: " << closestT << std::endl;
-				m_particleSystem->addEmitter(data[closestT], data[closestT + 1], data[closestT + 2]);
+				m_particleSystem->addEmitter(glm::vec3(data[closestT], data[closestT + 1], data[closestT + 2]), glm::vec3(data[closestT + 3], data[closestT + 4], data[closestT + 5]));
 			}
 			else
 				std::cout << "MISS\n";

@@ -3,41 +3,40 @@
 
 
 ParticleSystem::ParticleSystem()
-	:ParticleSystem(100)
+	:ParticleSystem(100, 10)
 {
 }
 
-ParticleSystem::ParticleSystem(GLuint maxParticles)
+ParticleSystem::ParticleSystem(GLuint maxParticles, GLuint maxEmitters)
 	:m_activeEmitters(0),
-	m_emitterParticles(nullptr),
-	m_maxLifetime(5.f)
+	m_maxLifetime(2.f),
+	m_maxParticles(maxParticles),
+	m_maxEmitters(maxEmitters)
 {
 	m_computeShader.AttachShaderToProgram("particle_compute.glsl", GL_VERTEX_SHADER);
 	const GLchar* feedbackVaryings[] = { "feedbackBlock.position", "feedbackBlock.lifetime" };
 	glTransformFeedbackVaryings(m_computeShader.getGLProgramID(), 2, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
-	//m_shader.AttachShaderToProgram("particle_fs.glsl", GL_FRAGMENT_SHADER);
 	m_computeShader.LinkShader();
 
 	m_drawShader.AttachShaderToProgram("particle_vs.glsl", GL_VERTEX_SHADER);
 	m_drawShader.AttachShaderToProgram("particle_fs.glsl", GL_FRAGMENT_SHADER);
 	m_drawShader.LinkShader();
 
-	m_noOfParticles = maxParticles;
-	//m_particles = new Particle[maxParticles];
-	m_particles = new GLfloat[maxParticles * 4](); //position + lifetime
+	m_particles = new GLfloat[m_maxParticles * DataInParticle]{ 0.0f };
+	m_emitters = new GLfloat[m_maxEmitters * DataInEmitter]{ 0.0f };
 
 	glGenVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);
 
 	glGenBuffers(1, &m_VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, m_noOfParticles * 4 * sizeof(GLfloat), m_particles, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, m_maxParticles * SizeOfParticle, m_particles, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, SizeOfParticle, (GLvoid*)0);
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, SizeOfParticle, (GLvoid*)(3 * sizeof(GLfloat)));
 
 	//CLEANUP
 	glBindVertexArray(0);
@@ -46,7 +45,7 @@ ParticleSystem::ParticleSystem(GLuint maxParticles)
 	//transform feedback
 	glGenBuffers(1, &m_feedbackBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, m_feedbackBuffer);
-	glBufferData(GL_ARRAY_BUFFER, m_noOfParticles * 4 * sizeof(GLfloat), nullptr, GL_STATIC_READ);
+	glBufferData(GL_ARRAY_BUFFER, m_maxParticles * SizeOfParticle, nullptr, GL_STATIC_READ);
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
 
@@ -55,11 +54,12 @@ ParticleSystem::ParticleSystem(GLuint maxParticles)
 
 ParticleSystem::~ParticleSystem()
 {
-	glDeleteBuffers(1, &m_VAO);
+	glDeleteVertexArrays(1, &m_VAO);
 	glDeleteBuffers(1, &m_VBO);
+	glDeleteBuffers(1, &m_feedbackBuffer);
 
 	delete[] m_particles;
-	delete[] m_emitterParticles;
+	delete[] m_emitters;
 }
 
 void ParticleSystem::update(float dt)
@@ -75,7 +75,8 @@ void ParticleSystem::update(float dt)
 	glGenQueries(1, &query);*/
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, 4 * sizeof(GLfloat) * m_noOfParticles, m_particles);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, SizeOfParticle * m_maxParticles, m_particles);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glEnable(GL_RASTERIZER_DISCARD);
 
@@ -84,6 +85,8 @@ void ParticleSystem::update(float dt)
 
 	glUniform1f(glGetUniformLocation(shaderId, "dt"), dt);
 	glUniform1f(glGetUniformLocation(shaderId, "maxLifetime"), m_maxLifetime);
+	glUniform1fv(glGetUniformLocation(shaderId, "emitters"), DataInEmitter * m_maxEmitters, m_emitters);
+	glUniform1i(glGetUniformLocation(shaderId, "activeEmitters"), m_activeEmitters);
 	glHandleError(__FUNCTION__, __LINE__);
 
 	//glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
@@ -92,7 +95,7 @@ void ParticleSystem::update(float dt)
 	glHandleError(__FUNCTION__, __LINE__);
 
 	glBindVertexArray(m_VAO);
-	glDrawArrays(GL_POINTS, 0, m_noOfParticles);
+	glDrawArrays(GL_POINTS, 0, m_maxParticles);
 	glBindVertexArray(0);
 	glHandleError(__FUNCTION__, __LINE__);
 	glFlush();
@@ -103,7 +106,7 @@ void ParticleSystem::update(float dt)
 
 	//GLuint primitives;
 	//glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
-	glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, 4 * sizeof(GLfloat) * m_noOfParticles, m_particles);
+	glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, SizeOfParticle * m_maxParticles, m_particles);
 
 	glHandleError(__FUNCTION__, __LINE__);
 
@@ -121,18 +124,21 @@ void ParticleSystem::draw(glm::mat4 projection, glm::mat4 view)
 	glUniform1f(glGetUniformLocation(shaderId, "maxLifetime"), m_maxLifetime);
 
 	glBindVertexArray(m_VAO);
-	glDrawArrays(GL_POINTS, 0, m_noOfParticles);
+	glDrawArrays(GL_POINTS, 0, m_maxParticles);
 	glBindVertexArray(0);
 
 	glHandleError(__FUNCTION__, __LINE__);
 }
 
-void ParticleSystem::addEmitter(GLfloat x, GLfloat y, GLfloat z)
+void ParticleSystem::addEmitter(glm::vec3 position, glm::vec3 normal)
 {
-	m_particles[m_activeEmitters * 4] = x;
-	m_particles[m_activeEmitters * 4 + 1] = y;
-	m_particles[m_activeEmitters * 4 + 2] = z;
-	m_particles[m_activeEmitters * 4 + 3] = 0.f;
+	memcpy(m_emitters, &position, 3 * sizeof(GLfloat));
+	memcpy(m_emitters + 3, &normal, 3 * sizeof(GLfloat));
+
+	/*m_particles[m_activeEmitters * 4] = position.x;
+	m_particles[m_activeEmitters * 4 + 1] = position.y;
+	m_particles[m_activeEmitters * 4 + 2] = position.z;
+	m_particles[m_activeEmitters * 4 + 3] = 0.f;*/
 	m_activeEmitters++;
 }
 

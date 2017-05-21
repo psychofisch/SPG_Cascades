@@ -11,38 +11,39 @@
 
 #include "Shader.h"
 
-//struct Particle
-//{
-//	Particle()
-//		:lifetime(666.f)
-//	{}
+//Particle DataStructure
+//	float x, y, z, lifetime -> sizeof(GLfloat) * 4
+#define DataInParticle 4
+#define SizeOfParticle (sizeof(GLfloat) * DataInParticle)
 //
-//	glm::vec3 position;
-//	GLfloat lifetime;
-//};
+//Emitter DataStructure
+//	float x, y, z, normalX, normalY, normalZ
+#define DataInEmitter 6
+#define SizeOfEmitter (sizeof(GLfloat) * DataInEmitter)
 
 class ParticleSystem
 {
 public:
 	ParticleSystem();
-	ParticleSystem(GLuint maxParticles);
+	ParticleSystem(GLuint maxParticles, GLuint maxEmitters);
 	~ParticleSystem();
 
 	void update(float dt);
 	void draw(glm::mat4 projection, glm::mat4 view);
-	void addEmitter(GLfloat x, GLfloat y, GLfloat z);
+	void addEmitter(glm::vec3 position, glm::vec3 normal);
 	GLuint getVAO();
 
 private:
 	GLuint m_activeEmitters,
 		m_VAO,
 		m_VBO,
-		m_noOfParticles,
-		m_feedbackBuffer;
+		m_maxParticles,
+		m_feedbackBuffer,
+		m_maxEmitters;
 	Shader m_computeShader,
 		m_drawShader;
 	GLfloat m_maxLifetime;
-	glm::vec3* m_emitterParticles;
+	GLfloat* m_emitters;
 	//Particle* m_particles;
 	GLfloat* m_particles;
 };
