@@ -84,7 +84,7 @@ void buildTriangle(vec3 points[3])
 
 	for(int i = 0; i < 3; i++)
 	{
-		gl_Position = gl_in[0].gl_Position + pv * vec4(points[i], 1.0f);
+		gl_Position = gl_in[0].gl_Position + pv * vec4(points[i], 0.0f); //why vec4(..., 0.0f)?
 		gsDataOut.position = vDataIn[0].position + points[i];
 		feedbackOut.position = gsDataOut.position;
 		feedbackOut.normals = gsDataOut.normal;
