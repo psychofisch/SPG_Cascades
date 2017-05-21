@@ -135,7 +135,7 @@ GLuint TerrainCreator::feedbackToVAO(size_t capturedPrimitives)
 
 	if (m_terrainFeedBackVAO != UINT_MAX)
 	{
-		glDeleteBuffers(1, &m_terrainFeedBackVAO);
+		glDeleteVertexArrays(1, &m_terrainFeedBackVAO);
 		glDeleteBuffers(1, &m_feedbackVBO);
 	}
 
@@ -200,7 +200,7 @@ float* TerrainCreator::createTerrain()
 #pragma omp parallel for
 		for (int y = 0; y < m_dimension.y; ++y)
 		{
-			float sinAdd = glm::sin(float(y) / m_dimension.y * 20) * 1.f;
+			float sinAdd = glm::sin(float(y) / m_dimension.y * 20);
 			for (uint z = 0; z < m_dimension.z; ++z)
 			{
 				float zDistance2Wall = glm::abs(zCenter - z) / m_dimension.z;

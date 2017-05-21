@@ -21,6 +21,7 @@
 #include "TerrainCreator.h"
 #include "vertTable.h"
 #include "edgeTable.h"
+#include "ParticleSystem.h"
 
 void glHandleError(const char* info);
 void glHandleError(const char* file, int line);
@@ -89,6 +90,7 @@ private:
 		m_edgeTable,
 		m_diffuseTexture;
 	ShaderManager m_shaderManager;
+	ParticleSystem* m_particleSystem;
 
 	void i_renderScene(Sceneobj* Scene, size_t size);
 	void i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_t shaderManagerId);

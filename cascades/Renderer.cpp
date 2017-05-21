@@ -121,6 +121,7 @@ void Renderer::mouse_button_callback(int button, int action)
 				//addHit(m_camera.position + (rayRay * closest), .1f);
 				//addLine(m_camera.position, rayRay, closest);
 				std::cout << "HIT@" << closest << "Index: " << closestT << std::endl;
+				m_particleSystem->addEmitter(data[closestT], data[closestT + 1], data[closestT + 2]);
 			}
 			else
 				std::cout << "MISS\n";
@@ -239,6 +240,8 @@ void Renderer::Run()
 		/*if (m_lightCam)
 			m_light.position = m_camera.position;*/
 
+		m_particleSystem->update(m_dt);
+
 		//color render
 		//glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 		//glClearColor(0.69f, 0.69f, 0.69f, 1.0f);
@@ -275,6 +278,7 @@ void Renderer::Run()
 			i_renderArray(m_terrainCreator->getFeedbackVAO(), m_terrainCreator->getVAOSize(), GL_TRIANGLES, 1);
 		}
 
+		m_particleSystem->draw(m_projection, m_view);
 		//render debug scene
 		/*if (m_debug)
 			i_renderScene(m_debugScene, m_view);
@@ -353,6 +357,8 @@ GLFWwindow * Renderer::createWindow(int width, int height)
 
 	//i_generateNewFrameBuffer();
 	glHandleError(__FILE__, __LINE__);
+
+	m_particleSystem = new ParticleSystem();
 
 	return m_window;
 }
