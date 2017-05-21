@@ -132,14 +132,17 @@ void ParticleSystem::draw(glm::mat4 projection, glm::mat4 view)
 
 void ParticleSystem::addEmitter(glm::vec3 position, glm::vec3 normal)
 {
-	memcpy(m_emitters, &position, 3 * sizeof(GLfloat));
-	memcpy(m_emitters + 3, &normal, 3 * sizeof(GLfloat));
+	memcpy(m_emitters + (DataInEmitter * m_activeEmitters), &position, 3 * sizeof(GLfloat));
+	memcpy(m_emitters + (DataInEmitter * m_activeEmitters) + 3, &normal, 3 * sizeof(GLfloat));
 
 	/*m_particles[m_activeEmitters * 4] = position.x;
 	m_particles[m_activeEmitters * 4 + 1] = position.y;
 	m_particles[m_activeEmitters * 4 + 2] = position.z;
 	m_particles[m_activeEmitters * 4 + 3] = 0.f;*/
 	m_activeEmitters++;
+
+	if (m_activeEmitters >= m_maxEmitters)
+		m_activeEmitters = 0;
 }
 
 GLuint ParticleSystem::getVAO()

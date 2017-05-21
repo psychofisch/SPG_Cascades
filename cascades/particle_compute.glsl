@@ -35,11 +35,13 @@ void main()
 	{
 		if(activeEmitters > 0)
 		{
-			float r = randFunction(position.xy);
+			float r = randFunction(vec2(gl_VertexID, dt * 100));
 			if(r < 0.01f)
 			{
-				//feedbackOut.position = emitters[int(round(r * activeEmitters))].position;
-				feedbackOut.position = vec3(emitters[0], emitters[1], emitters[2]);
+				//int index = int(floor(r * activeEmitters)) * 6;
+				int index = (gl_VertexID%activeEmitters) * 6;
+				feedbackOut.position = vec3(emitters[index], emitters[index + 1], emitters[index + 2]);
+				//feedbackOut.position = vec3(emitters[0], emitters[1], emitters[2]);
 				feedbackOut.lifetime = maxLifetime;
 			}
 		}
