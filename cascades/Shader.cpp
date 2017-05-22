@@ -99,6 +99,11 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLcha
 
 }
 
+Shader::~Shader()
+{
+	glDeleteShader(m_program);
+}
+
 GLuint Shader::getGLProgramID()
 {
 	return m_program;
@@ -145,7 +150,7 @@ void Shader::AttachShaderToProgram(const char* path, int ShaderType)
 		glGetShaderInfoLog(shader, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
 		std::cin.ignore();
-		exit(13);
+		//exit(13);
 	}
 	glHandleError(__FILE__, __LINE__);
 

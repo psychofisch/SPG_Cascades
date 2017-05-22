@@ -33,6 +33,7 @@ public:
 	void update(float dt);
 	void draw(glm::mat4 projection, glm::mat4 view);
 	void addEmitter(glm::vec3 position, glm::vec3 normal);
+	void compileShader();
 	GLuint getVAO();
 
 private:

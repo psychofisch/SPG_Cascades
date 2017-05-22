@@ -7,7 +7,7 @@ out vData{
 	mat4 p;
 	mat4 v;
 	vec3 position;
-	float pLifetime;
+	float age;
 	vec3 pVelocity;
 } vDataOut;
 
@@ -24,6 +24,6 @@ void main()
 	vDataOut.p = projection;
 	vDataOut.v = view;
 	
-	vDataOut.pLifetime = lifetime;
+	vDataOut.age = 1.0 - lifetime / maxLifetime;
 	vDataOut.pVelocity = velocity;
 }

@@ -6,7 +6,7 @@ in vData{
 	mat4 p;
 	mat4 v;
 	vec3 position;
-	float pLifetime;
+	float age;
 	vec3 pVelocity;
 } vDataIn[];
 
@@ -15,7 +15,7 @@ out Data{
 	vec3 normal;
 	vec4 color;
 	mat4 pv;
-	float lifetime;
+	float age;
 	vec2 uv;
 	vec3 velocity;
 } gsDataOut;
@@ -41,8 +41,13 @@ void build_quad(vec4 position, float size)
 
 void main()
 {
-	gsDataOut.lifetime = vDataIn[0].pLifetime;
+	gsDataOut.age = vDataIn[0].age;
 	gsDataOut.velocity = vDataIn[0].pVelocity;
 	
-	build_quad(gl_in[0].gl_Position, 1.0);
+	float size = 1.0;
+	
+	if(gsDataOut.age > 0.6)
+		size += (gsDataOut.age - 0.6) * 5.0;
+		
+	build_quad(gl_in[0].gl_Position, size);
 }

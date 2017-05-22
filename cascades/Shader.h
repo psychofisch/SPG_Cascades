@@ -16,6 +16,7 @@ public:
 
 	//Shader(const GLchar* vertexPath, const GLchar* fragmentPath);
 	Shader(const GLchar* vertexPath, const GLchar* fragmentPath, const GLchar* geometryPath = nullptr);
+	~Shader();
 	GLuint getGLProgramID();
 	void AttachShaderToProgram(const char* path, int ShaderType);
 	void LinkShader();

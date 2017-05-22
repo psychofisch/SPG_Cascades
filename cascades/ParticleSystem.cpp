@@ -3,7 +3,7 @@
 
 
 ParticleSystem::ParticleSystem()
-	:ParticleSystem(100, 10)
+	:ParticleSystem(1000, 10)
 {
 }
 
@@ -13,15 +13,7 @@ ParticleSystem::ParticleSystem(GLuint maxParticles, GLuint maxEmitters)
 	m_maxParticles(maxParticles),
 	m_maxEmitters(maxEmitters)
 {
-	m_computeShader.AttachShaderToProgram("particle_compute.glsl", GL_VERTEX_SHADER);
-	const GLchar* feedbackVaryings[] = { "feedbackBlock.position", "feedbackBlock.velocity", "feedbackBlock.lifetime" };
-	glTransformFeedbackVaryings(m_computeShader.getGLProgramID(), 3, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
-	m_computeShader.LinkShader();
-
-	m_drawShader.AttachShaderToProgram("particle_vs.glsl", GL_VERTEX_SHADER);
-	m_drawShader.AttachShaderToProgram("particle_gs.glsl", GL_GEOMETRY_SHADER);
-	m_drawShader.AttachShaderToProgram("particle_fs.glsl", GL_FRAGMENT_SHADER);
-	m_drawShader.LinkShader();
+	compileShader();
 
 	m_particles = new GLfloat[m_maxParticles * DataInParticle]{ 0.0f };
 	m_emitters = new GLfloat[m_maxEmitters * DataInEmitter]{ 0.0f };
@@ -62,7 +54,7 @@ ParticleSystem::ParticleSystem(GLuint maxParticles, GLuint maxEmitters)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	// Load, create texture and generate mipmaps
 	int width, height;
-	unsigned char* image = SOIL_load_image("smoke_alpha.png", &width, &height, 0, SOIL_LOAD_RGBA);
+	unsigned char* image = SOIL_load_image("smoke_alpha2.png", &width, &height, 0, SOIL_LOAD_RGBA);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	SOIL_free_image_data(image);
@@ -163,6 +155,21 @@ void ParticleSystem::addEmitter(glm::vec3 position, glm::vec3 normal)
 
 	if (m_activeEmitters >= m_maxEmitters)
 		m_activeEmitters = 0;
+}
+
+void ParticleSystem::compileShader()
+{
+	m_computeShader = Shader();
+	m_computeShader.AttachShaderToProgram("particle_compute.glsl", GL_VERTEX_SHADER);
+	const GLchar* feedbackVaryings[] = { "feedbackBlock.position", "feedbackBlock.velocity", "feedbackBlock.lifetime" };
+	glTransformFeedbackVaryings(m_computeShader.getGLProgramID(), 3, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
+	m_computeShader.LinkShader();
+
+	m_drawShader = Shader();
+	m_drawShader.AttachShaderToProgram("particle_vs.glsl", GL_VERTEX_SHADER);
+	m_drawShader.AttachShaderToProgram("particle_gs.glsl", GL_GEOMETRY_SHADER);
+	m_drawShader.AttachShaderToProgram("particle_fs.glsl", GL_FRAGMENT_SHADER);
+	m_drawShader.LinkShader();
 }
 
 GLuint ParticleSystem::getVAO()

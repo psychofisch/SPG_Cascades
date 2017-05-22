@@ -41,6 +41,8 @@ void Renderer::key_callback(int key, int action)
 			m_shaderManager.attachShaderToProgram(0, "terrain_fs.glsl", GL_FRAGMENT_SHADER);
 			m_shaderManager.attachShaderToProgram(0, "terrain_gs.glsl", GL_GEOMETRY_SHADER);
 			m_shaderManager.LinkShader(0);
+
+			m_particleSystem->compileShader();
 			break;
 		case GLFW_KEY_R:
 			m_transformFeedbackSwitch = true;
