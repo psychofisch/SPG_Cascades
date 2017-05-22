@@ -12,8 +12,8 @@
 #include "Shader.h"
 
 //Particle DataStructure
-//	float x, y, z, lifetime -> sizeof(GLfloat) * 4
-#define DataInParticle 4
+//	float x, y, z, vx, vy, vz, lifetime -> sizeof(GLfloat) * 4
+#define DataInParticle 7
 #define SizeOfParticle (sizeof(GLfloat) * DataInParticle)
 //
 //Emitter DataStructure

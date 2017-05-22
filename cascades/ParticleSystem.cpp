@@ -14,8 +14,8 @@ ParticleSystem::ParticleSystem(GLuint maxParticles, GLuint maxEmitters)
 	m_maxEmitters(maxEmitters)
 {
 	m_computeShader.AttachShaderToProgram("particle_compute.glsl", GL_VERTEX_SHADER);
-	const GLchar* feedbackVaryings[] = { "feedbackBlock.position", "feedbackBlock.lifetime" };
-	glTransformFeedbackVaryings(m_computeShader.getGLProgramID(), 2, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
+	const GLchar* feedbackVaryings[] = { "feedbackBlock.position", "feedbackBlock.velocity", "feedbackBlock.lifetime" };
+	glTransformFeedbackVaryings(m_computeShader.getGLProgramID(), 3, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
 	m_computeShader.LinkShader();
 
 	m_drawShader.AttachShaderToProgram("particle_vs.glsl", GL_VERTEX_SHADER);
@@ -36,7 +36,10 @@ ParticleSystem::ParticleSystem(GLuint maxParticles, GLuint maxEmitters)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, SizeOfParticle, (GLvoid*)0);
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, SizeOfParticle, (GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, SizeOfParticle, (GLvoid*)(3 * sizeof(GLfloat)));
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, SizeOfParticle, (GLvoid*)(6 * sizeof(GLfloat)));
 
 	//CLEANUP
 	glBindVertexArray(0);
@@ -64,19 +67,13 @@ ParticleSystem::~ParticleSystem()
 
 void ParticleSystem::update(float dt)
 {
-	/*GLuint activeParticles = 0;
-
-	for (int i = 0; i < m_noOfParticles; ++i)
-	{
-		if(m_particles[i].lifetime > m_ttl)
-	}*/
-
 	/*GLuint query;
 	glGenQueries(1, &query);*/
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, SizeOfParticle * m_maxParticles, m_particles);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glHandleError(__FUNCTION__, __LINE__);
 
 	glEnable(GL_RASTERIZER_DISCARD);
 
@@ -86,7 +83,7 @@ void ParticleSystem::update(float dt)
 	glUniform1f(glGetUniformLocation(shaderId, "dt"), dt);
 	glUniform1f(glGetUniformLocation(shaderId, "maxLifetime"), m_maxLifetime);
 	glUniform1fv(glGetUniformLocation(shaderId, "emitters"), DataInEmitter * m_maxEmitters, m_emitters);
-	glUniform1i(glGetUniformLocation(shaderId, "activeEmitters"), m_activeEmitters);
+	glUniform1ui(glGetUniformLocation(shaderId, "activeEmitters"), m_activeEmitters);
 	glHandleError(__FUNCTION__, __LINE__);
 
 	//glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
@@ -98,9 +95,9 @@ void ParticleSystem::update(float dt)
 	glDrawArrays(GL_POINTS, 0, m_maxParticles);
 	glBindVertexArray(0);
 	glHandleError(__FUNCTION__, __LINE__);
+	glEndTransformFeedback();
 	glFlush();
 
-	glEndTransformFeedback();
 	//glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
 	glHandleError(__FUNCTION__, __LINE__);
 

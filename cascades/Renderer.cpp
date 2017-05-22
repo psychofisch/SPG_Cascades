@@ -240,13 +240,13 @@ void Renderer::Run()
 		/*if (m_lightCam)
 			m_light.position = m_camera.position;*/
 
-		m_particleSystem->update(m_dt);
-
 		//color render
 		//glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 		//glClearColor(0.69f, 0.69f, 0.69f, 1.0f);
 		glClearColor(0.f, 0.f, 0.f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		m_particleSystem->update(m_dt);
 
 		GLuint query;
 		glGenQueries(1, &query);
