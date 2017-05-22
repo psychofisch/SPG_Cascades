@@ -27,10 +27,12 @@ void main()
 {
 	if(lifetime > 0.0f)
 	{
-		vec3 newPosition = position;
+		vec3 newVelocity = normalize(velocity * 2.0f + 0.02f * vec3(0,1,0));
+		vec3 newPosition = position + (newVelocity * dt);
 	
-		newPosition.y += 1.0f * dt;
+		//newPosition.y += 1.0f * dt;
 		feedbackOut.position = newPosition;
+		feedbackOut.velocity = newVelocity;
 		feedbackOut.lifetime = lifetime - dt;
 	}
 	else
@@ -49,7 +51,7 @@ void main()
 				//feedbackOut.velocity = vec3(0);
 				//feedbackOut.position = vec3(emitters[0], emitters[1], emitters[2]);
 				//feedbackOut.lifetime = maxLifetime;
-				feedbackOut.lifetime = 2.0f;
+				feedbackOut.lifetime = maxLifetime;
 			}
 		}
 	}

@@ -8,9 +8,11 @@ out vec3 pVelocity;
 
 uniform mat4 projection;
 uniform mat4 view;
+uniform float maxLifetime;
 
 void main()
 {
+	//gl_PointSize = 10.f * max(0.2, (lifetime / maxLifetime));
 	gl_PointSize = 5.f;
 	gl_Position = projection * view * vec4(position.x, position.y, position.z, 1.0f);
 	pLifetime = lifetime;

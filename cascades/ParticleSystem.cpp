@@ -9,7 +9,7 @@ ParticleSystem::ParticleSystem()
 
 ParticleSystem::ParticleSystem(GLuint maxParticles, GLuint maxEmitters)
 	:m_activeEmitters(0),
-	m_maxLifetime(2.f),
+	m_maxLifetime(5.f),
 	m_maxParticles(maxParticles),
 	m_maxEmitters(maxEmitters)
 {
@@ -108,7 +108,6 @@ void ParticleSystem::update(float dt)
 	glHandleError(__FUNCTION__, __LINE__);
 
 	glDisable(GL_RASTERIZER_DISCARD);
-
 	//glDeleteQueries(1, &query);
 }
 
