@@ -19,6 +19,7 @@ ParticleSystem::ParticleSystem(GLuint maxParticles, GLuint maxEmitters)
 	m_computeShader.LinkShader();
 
 	m_drawShader.AttachShaderToProgram("particle_vs.glsl", GL_VERTEX_SHADER);
+	m_drawShader.AttachShaderToProgram("particle_gs.glsl", GL_GEOMETRY_SHADER);
 	m_drawShader.AttachShaderToProgram("particle_fs.glsl", GL_FRAGMENT_SHADER);
 	m_drawShader.LinkShader();
 
@@ -52,6 +53,21 @@ ParticleSystem::ParticleSystem(GLuint maxParticles, GLuint maxEmitters)
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
 
+	glGenTextures(1, &m_smokeTexture);
+	glBindTexture(GL_TEXTURE_2D, m_smokeTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// Set texture filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Load, create texture and generate mipmaps
+	int width, height;
+	unsigned char* image = SOIL_load_image("smoke_alpha.png", &width, &height, 0, SOIL_LOAD_RGBA);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	SOIL_free_image_data(image);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	glHandleError(__FUNCTION__);
 }
 
@@ -84,6 +100,10 @@ void ParticleSystem::update(float dt)
 	glUniform1f(glGetUniformLocation(shaderId, "maxLifetime"), m_maxLifetime);
 	glUniform1fv(glGetUniformLocation(shaderId, "emitters"), DataInEmitter * m_maxEmitters, m_emitters);
 	glUniform1ui(glGetUniformLocation(shaderId, "activeEmitters"), m_activeEmitters);
+	
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_smokeTexture);
+	glUniform1i(glGetUniformLocation(shaderId, "smokeTexture"), m_smokeTexture);
 	glHandleError(__FUNCTION__, __LINE__);
 
 	//glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
@@ -113,6 +133,8 @@ void ParticleSystem::update(float dt)
 
 void ParticleSystem::draw(glm::mat4 projection, glm::mat4 view)
 {
+	//glDisable(GL_DEPTH_TEST);
+
 	m_drawShader.Use();
 	GLuint shaderId = m_drawShader.getGLProgramID();
 	glUniformMatrix4fv(glGetUniformLocation(shaderId, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -122,6 +144,8 @@ void ParticleSystem::draw(glm::mat4 projection, glm::mat4 view)
 	glBindVertexArray(m_VAO);
 	glDrawArrays(GL_POINTS, 0, m_maxParticles);
 	glBindVertexArray(0);
+
+	//glEnable(GL_DEPTH_TEST);
 
 	glHandleError(__FUNCTION__, __LINE__);
 }

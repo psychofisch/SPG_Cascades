@@ -67,6 +67,8 @@ void main(int agrc, char* argv[])
 	size_t terrainShader = sM->createNewShader();
 	sM->attachShaderToProgram(terrainShader, "terrain_vs.glsl", GL_VERTEX_SHADER);
 	sM->attachShaderToProgram(terrainShader, "terrain_gs.glsl", GL_GEOMETRY_SHADER);
+	const GLchar* feedbackVaryings[] = { "feedbackBlock.position", "feedbackBlock.normals" };
+	glTransformFeedbackVaryings(sM->getGLIdById(terrainShader), 2, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
 	sM->attachShaderToProgram(terrainShader, "terrain_fs.glsl", GL_FRAGMENT_SHADER);
 	sM->LinkShader(terrainShader);
 

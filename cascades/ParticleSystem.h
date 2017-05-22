@@ -9,6 +9,8 @@
 #include <glm/glm.hpp>
 #include <glm\gtc\type_ptr.hpp>
 
+#include "SOIL.h"
+
 #include "Shader.h"
 
 //Particle DataStructure
@@ -39,7 +41,8 @@ private:
 		m_VBO,
 		m_maxParticles,
 		m_feedbackBuffer,
-		m_maxEmitters;
+		m_maxEmitters,
+		m_smokeTexture;
 	Shader m_computeShader,
 		m_drawShader;
 	GLfloat m_maxLifetime;

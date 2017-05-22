@@ -161,8 +161,6 @@ void Shader::AttachShaderToProgram(const char* path, int ShaderType)
 	else if (ShaderType == GL_GEOMETRY_SHADER)
 	{
 		m_gs = shader;
-		const GLchar* feedbackVaryings[] = { "feedbackBlock.position", "feedbackBlock.normals" };
-		glTransformFeedbackVaryings(m_program, 2, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
 	}
 	else if (ShaderType == GL_FRAGMENT_SHADER)
 	{

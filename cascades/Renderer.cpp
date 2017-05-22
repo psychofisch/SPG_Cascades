@@ -280,7 +280,11 @@ void Renderer::Run()
 			i_renderArray(m_terrainCreator->getFeedbackVAO(), m_terrainCreator->getVAOSize(), GL_TRIANGLES, 1);
 		}
 
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		m_particleSystem->draw(m_projection, m_view);
+		glDisable(GL_BLEND);
+
 		//render debug scene
 		/*if (m_debug)
 			i_renderScene(m_debugScene, m_view);

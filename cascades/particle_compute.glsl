@@ -25,10 +25,12 @@ float randFunction(vec2 co){
 
 void main()
 {
+	float r = randFunction(vec2(gl_VertexID, dt * 100));
+
 	if(lifetime > 0.0f)
 	{
 		vec3 newVelocity = normalize(velocity * 2.0f + 0.02f * vec3(0,1,0));
-		vec3 newPosition = position + (newVelocity * dt);
+		vec3 newPosition = position + (newVelocity * dt * 2);
 	
 		//newPosition.y += 1.0f * dt;
 		feedbackOut.position = newPosition;
@@ -39,8 +41,7 @@ void main()
 	{
 		if(activeEmitters > 0)
 		{
-			float r = randFunction(vec2(gl_VertexID, dt * 100));
-			if(r < 0.01f)
+			if(r < 0.00005f)
 			{
 				//int index = int(floor(r * activeEmitters)) * 6;
 				uint index = (gl_VertexID%activeEmitters) * 6;
