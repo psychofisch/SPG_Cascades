@@ -28,6 +28,7 @@ void main()
 	vec2 seed = vec2(gl_VertexID, dt * 100);
 	float r = randFunction(seed);
 	vec3 randVec3 = (vec3(randFunction(vec2(seed.x + 13, seed.y)), randFunction(vec2(seed.y, seed.x)), r) - 0.5) * 0.1;
+	//vec3 randVec3 = vec3(0.0);
 
 	if(lifetime > 0.0f)
 	{
@@ -53,7 +54,6 @@ void main()
 				feedbackOut.velocity = vec3(emitters[index + 3], emitters[index + 4], emitters[index + 5]);
 				//feedbackOut.velocity = vec3(0);
 				//feedbackOut.position = vec3(emitters[0], emitters[1], emitters[2]);
-				//feedbackOut.lifetime = maxLifetime;
 				feedbackOut.lifetime = maxLifetime;
 			}
 		}

@@ -3,7 +3,7 @@
 
 
 ParticleSystem::ParticleSystem()
-	:ParticleSystem(1000, 10)
+	:ParticleSystem(10000, 10)
 {
 }
 
@@ -15,8 +15,8 @@ ParticleSystem::ParticleSystem(GLuint maxParticles, GLuint maxEmitters)
 {
 	compileShader();
 
-	m_particles = new GLfloat[m_maxParticles * DataInParticle]{ 0.0f };
-	m_emitters = new GLfloat[m_maxEmitters * DataInEmitter]{ 0.0f };
+	m_particles = new GLfloat[m_maxParticles * DataInParticle];
+	m_emitters = new GLfloat[m_maxEmitters * DataInEmitter];
 
 	glGenVertexArrays(1, &m_VAO);
 	glBindVertexArray(m_VAO);
