@@ -47,6 +47,9 @@ void Renderer::key_callback(int key, int action)
 		case GLFW_KEY_R:
 			m_transformFeedbackSwitch = true;
 			break;
+		case GLFW_KEY_L:
+			m_light.position = m_camera.position;
+			break;
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
 			break;
@@ -178,12 +181,9 @@ void Renderer::Run()
 	SOIL_free_image_data(image);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	i_generateNewFrameBuffer();
+
 	//transform feedback
-	/*size_t transformDataSize = sizeof(GL_FLOAT) * 6 * m_scene[0].iCount * 3;
-	glGenBuffers(1, &m_transformFeedback);
-	glBindBuffer(GL_ARRAY_BUFFER, m_transformFeedback);
-	glBufferData(GL_ARRAY_BUFFER, transformDataSize, nullptr, GL_STATIC_READ);
-	GLfloat* transformFeedbackData = new GLfloat[transformDataSize]{0};*/
 	m_terrainCreator->initFeedback();
 
 	mouse_callback(m_size.x/2, m_size.y/2);
@@ -237,6 +237,7 @@ void Renderer::Run()
 		//glm::mat4 translate = glm::mat4(1.0f);
 		m_view = glm::translate(m_view, -m_camera.position);
 		m_view = glm::mat4_cast(m_camera.rotation) * m_view;
+		//m_light.position = m_camera.position;
 
 		//keyboard events
 		glfwPollEvents();
@@ -245,9 +246,9 @@ void Renderer::Run()
 			m_light.position = m_camera.position;*/
 
 		//color render
-		//glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
-		//glClearColor(0.69f, 0.69f, 0.69f, 1.0f);
-		glClearColor(0.f, 0.f, 0.f, 1.0f);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
+		glClearColor(0.69f, 0.69f, 0.69f, 1.0f);
+		//glClearColor(0.f, 0.f, 0.f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		m_particleSystem->update(m_dt);
@@ -293,12 +294,12 @@ void Renderer::Run()
 */
 		//if(m_drawAnimation && false)
 		//	drawAnimation(m_view);
-
-		// 2. Now blit multisampled buffer(s) to default framebuffers
-		//glBindFramebuffer(GL_READ_FRAMEBUFFER, m_framebuffer);
-		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		//glBlitFramebuffer(0, 0, m_size.x, m_size.y, 0, 0, m_size.x, m_size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	
+		// 2. Now blit multisampled buffer(s) to default framebuffers
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_framebuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBlitFramebuffer(0, 0, m_size.x, m_size.y, 0, 0, m_size.x, m_size.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
 		//swap buffers
 		glfwSwapBuffers(m_window);
 		glHandleError("post swap buffers");
@@ -446,7 +447,7 @@ void Renderer::i_renderScene(Sceneobj* scene, size_t size)
 
 	glUniform1f(glGetUniformLocation(shaderId, "densityThreshold"), m_densityThreshold);
 
-	glUniform3f(glGetUniformLocation(shaderId, "lightPos"), m_camera.position.x, m_camera.position.y, m_camera.position.z);
+	glUniform3f(glGetUniformLocation(shaderId, "lightPos"), m_light.position.x, m_light.position.y, m_light.position.z);
 	//glUniform3f(glGetUniformLocation(shaderId, "lightPos"), 0, 0, 0);
 	glUniform3f(glGetUniformLocation(shaderId, "cameraPos"), m_camera.position.x, m_camera.position.y, m_camera.position.z);
 
@@ -508,9 +509,33 @@ void Renderer::i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_
 	glHandleError(__FILE__, __LINE__);
 }
 
-void Renderer::i_transformFeedback()
+void Renderer::i_generateNewFrameBuffer()
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glDeleteFramebuffers(1, &m_framebuffer);
+	glDeleteRenderbuffers(1, &m_rbo);
 
+	//FBO
+	glGenFramebuffers(1, &m_framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
+	// Create a multisampled color attachment texture
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_size.x, m_size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+	// Create a renderbuffer object for depth and stencil attachments
+	glGenRenderbuffers(1, &m_rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_size.x, m_size.y);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::setPerspective(float fovy, float aspect, float near, float far)

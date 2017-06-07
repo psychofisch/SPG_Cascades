@@ -32,7 +32,7 @@ void main()
 
 	if(lifetime > 0.0f)
 	{
-		vec3 newVelocity = normalize(velocity * 2.0f + 0.02f * vec3(0,1,0)) + randVec3;
+		vec3 newVelocity = normalize(velocity * 2.0f + 0.02f * vec3(0,1,0)) + randVec3 * 0.5;
 		vec3 newPosition = position + (newVelocity * dt * 2);
 	
 		//newPosition.y += 1.0f * dt;

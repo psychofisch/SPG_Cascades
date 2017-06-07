@@ -49,7 +49,7 @@ void main()
 	vec3 color = xColor * blend.x * 1 + yColor * blend.y * 1 + zColor * blend.z * 1;
 	
 	// Ambient
-	float ambientStrength = 0.2;
+	float ambientStrength = 0.1;
 	vec3 ambient = ambientStrength * lightColor;
 	
 	// Diffuse 
@@ -66,7 +66,7 @@ void main()
 	float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0);
 	vec3 specular = specularStrength * spec * vec3(1.0)/** lightColor*/;  
 	
-	vec3 lighting = diffuse + specular;
+	vec3 lighting = diffuse + specular + ambient;
 	fragColor = vec4(lighting, 1.0);
 	//fragColor = vec4(abs(normalize(dataIn.normal)), 1.0);
 	//fragColor = dataIn.color;

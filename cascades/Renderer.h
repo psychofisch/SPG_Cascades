@@ -47,6 +47,19 @@ struct Sceneobj {
 	//void calcOrigin();
 };
 
+struct Light {
+	Light()
+		:position(0.0f),
+		color(1.0f),
+		intensity(1.0f)
+	{};
+
+	glm::vec3 position;
+	glm::vec3 color;
+	float intensity;
+	float ambientIntensity;
+};
+
 class Renderer
 {
 public:
@@ -75,6 +88,7 @@ private:
 	GLFWwindow* m_window;
 	glm::ivec2 m_size;
 	Camera m_camera;
+	Light m_light;
 	glm::vec2 m_mouse;
 	bool m_debug,
 		m_transformFeedbackSwitch,
@@ -88,11 +102,13 @@ private:
 	GLuint m_terrainTexture,
 		m_vertTable,
 		m_edgeTable,
-		m_diffuseTexture;
+		m_diffuseTexture,
+		m_framebuffer,
+		m_rbo;
 	ShaderManager m_shaderManager;
 	ParticleSystem* m_particleSystem;
 
 	void i_renderScene(Sceneobj* Scene, size_t size);
 	void i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_t shaderManagerId);
-	void i_transformFeedback();
+	void i_generateNewFrameBuffer();
 };

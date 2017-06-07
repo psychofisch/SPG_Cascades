@@ -48,7 +48,7 @@ void main()
 	// Diffuse 
 	vec3 lightDir = normalize(lightPos - dataIn.position);
 	vec3 viewDir = normalize(cameraPos - dataIn.position);
-	float diff = max(dot(lightDir, normal), 0.0);
+	float diff = max(dot(lightDir, normal), 1.0);
 	//vec4 diffuse = dataIn.color * diff;
 	vec3 diffuse = diff * lightColor * color;
 
