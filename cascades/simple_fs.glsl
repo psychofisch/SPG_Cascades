@@ -86,7 +86,7 @@ void main()
 	
 	// Ambient
 	float ambientStrength = 0.1;
-	vec3 ambient = ambientStrength * lightColor;
+	vec3 ambient = ambientStrength * lightColor * color;
 	
 	// Diffuse 
 	vec3 lightDir = normalize(lightPos - dataIn.position);

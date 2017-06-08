@@ -496,7 +496,7 @@ void Renderer::i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_
 		glHandleError(__FILE__, __LINE__);
 	}
 
-	GLfloat near_plane = 1.0f, far_plane = 20.0f;
+	GLfloat near_plane = 1.0f, far_plane = 100.0f;
 	glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
 	glm::mat4 lightView = glm::lookAt(glm::vec3(m_light.position.x, 10.0f, m_light.position.z),
 		glm::vec3(0.0f),
