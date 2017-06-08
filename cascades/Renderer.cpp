@@ -182,6 +182,7 @@ void Renderer::Run()
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	i_generateNewFrameBuffer();
+	i_initShadow();
 
 	//transform feedback
 	m_terrainCreator->initFeedback();
@@ -279,6 +280,17 @@ void Renderer::Run()
 		}
 		else
 		{
+			m_shaderManager.UseShader(2);
+			glViewport(0, 0, m_shadow.size, m_shadow.size);
+			glBindFramebuffer(GL_FRAMEBUFFER, m_shadow.depthFBO);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			i_renderArray(m_terrainCreator->getFeedbackVAO(), m_terrainCreator->getVAOSize(), GL_TRIANGLES, 2);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, m_size.x, m_size.y); //reset viewport
+
+			glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
+			glClearColor(0.69f, 0.69f, 0.69f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			m_shaderManager.UseShader(1);
 			i_renderArray(m_terrainCreator->getFeedbackVAO(), m_terrainCreator->getVAOSize(), GL_TRIANGLES, 1);
 		}
@@ -484,6 +496,18 @@ void Renderer::i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_
 		glHandleError(__FILE__, __LINE__);
 	}
 
+	GLfloat near_plane = 1.0f, far_plane = 20.0f;
+	glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
+	glm::mat4 lightView = glm::lookAt(glm::vec3(m_light.position.x, 10.0f, m_light.position.z),
+		glm::vec3(0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 lightMatrix = lightProjection * lightView;
+	glUniformMatrix4fv(glGetUniformLocation(shaderId, "lightMatrix"), 1, GL_FALSE, glm::value_ptr(lightMatrix));
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, m_shadow.depthTex);
+	glUniform1i(glGetUniformLocation(shaderId, "depthMap"), 2);
+
 	glUniformMatrix4fv(glGetUniformLocation(shaderId, "projection"), 1, GL_FALSE, glm::value_ptr(m_projection));
 	glUniformMatrix4fv(glGetUniformLocation(shaderId, "view"), 1, GL_FALSE, glm::value_ptr(m_view));
 
@@ -496,7 +520,8 @@ void Renderer::i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_
 	glUniform1i(glGetUniformLocation(shaderId, "edgeTable"), 2);*/
 	//glUniform1iv(glGetUniformLocation(shaderId, "edgeTable"), 256, edgeTable);
 
-	glUniform3f(glGetUniformLocation(shaderId, "lightPos"), m_camera.position.x, m_camera.position.y, m_camera.position.z);
+	glUniform3f(glGetUniformLocation(shaderId, "lightPos"), m_light.position.x, m_light.position.y, m_light.position.z);
+	//glUniform3fv(glGetUniformLocation(shaderId, "lightPos"), 3, glm::value_ptr(m_light.position));
 	//glUniform3f(glGetUniformLocation(shaderId, "lightPos"), 0, 0, 0);
 	glUniform3f(glGetUniformLocation(shaderId, "cameraPos"), m_camera.position.x, m_camera.position.y, m_camera.position.z);
 
@@ -541,6 +566,30 @@ void Renderer::i_generateNewFrameBuffer()
 void Renderer::setPerspective(float fovy, float aspect, float near, float far)
 {
 	m_projection = glm::perspective(fovy, aspect, near, far);
+}
+
+void Renderer::i_initShadow()
+{
+	glGenFramebuffers(1, &m_shadow.depthFBO);
+
+	m_shadow.size = 2048;
+
+	glGenTextures(1, &m_shadow.depthTex);
+	glBindTexture(GL_TEXTURE_2D, m_shadow.depthTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_shadow.size, m_shadow.size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_shadow.depthFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadow.depthTex, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 //statics

@@ -34,7 +34,7 @@ void main(int agrc, char* argv[])
 	//};
 	//int vSize = 12;
 
-	TerrainCreator::vec3i terrainSize(64, 128, 64);
+	TerrainCreator::vec3i terrainSize(32, 64, 32);
 
 	int t = time(NULL);
 	TerrainCreator terrain(terrainSize.x, terrainSize.y, terrainSize.z, 1337*3);
@@ -76,6 +76,11 @@ void main(int agrc, char* argv[])
 	sM->attachShaderToProgram(mainShader, "simple_vs.glsl", GL_VERTEX_SHADER);
 	sM->attachShaderToProgram(mainShader, "simple_fs.glsl", GL_FRAGMENT_SHADER);
 	sM->LinkShader(mainShader);
+
+	size_t shadowShader = sM->createNewShader();
+	sM->attachShaderToProgram(shadowShader, "shadow_vs.glsl", GL_VERTEX_SHADER);
+	sM->attachShaderToProgram(shadowShader, "shadow_fs.glsl", GL_FRAGMENT_SHADER);
+	sM->LinkShader(shadowShader);
 
 	renderer.getObjectById(objId)->shader = terrainShader;
 	renderer.getObjectById(objId)->iCount = vSize / 3;

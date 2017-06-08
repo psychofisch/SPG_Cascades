@@ -60,6 +60,12 @@ struct Light {
 	float ambientIntensity;
 };
 
+struct Shadow {
+	GLuint size;
+	GLuint depthFBO;
+	GLuint depthTex;
+};
+
 class Renderer
 {
 public:
@@ -107,8 +113,10 @@ private:
 		m_rbo;
 	ShaderManager m_shaderManager;
 	ParticleSystem* m_particleSystem;
+	Shadow m_shadow;
 
 	void i_renderScene(Sceneobj* Scene, size_t size);
 	void i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_t shaderManagerId);
 	void i_generateNewFrameBuffer();
+	void i_initShadow();
 };
