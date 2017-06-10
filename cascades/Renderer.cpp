@@ -36,19 +36,31 @@ void Renderer::key_callback(int key, int action)
 			m_transformFeedbackSwitch = true;
 			break;
 		case GLFW_KEY_C:
+		{
 			m_shaderManager.clearShader(0);
 			m_shaderManager.attachShaderToProgram(0, "terrain_vs.glsl", GL_VERTEX_SHADER);
-			m_shaderManager.attachShaderToProgram(0, "terrain_fs.glsl", GL_FRAGMENT_SHADER);
 			m_shaderManager.attachShaderToProgram(0, "terrain_gs.glsl", GL_GEOMETRY_SHADER);
+			const GLchar* feedbackVaryings[] = { "feedbackBlock.position", "feedbackBlock.normals" };
+			glTransformFeedbackVaryings(m_shaderManager.getGLIdById(0), 2, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
+			m_shaderManager.attachShaderToProgram(0, "terrain_fs.glsl", GL_FRAGMENT_SHADER);
 			m_shaderManager.LinkShader(0);
 
 			m_particleSystem->compileShader();
+
+			m_shaderManager.clearShader(1);
+			m_shaderManager.attachShaderToProgram(1, "simple_vs.glsl", GL_VERTEX_SHADER);
+			m_shaderManager.attachShaderToProgram(1, "simple_fs.glsl", GL_FRAGMENT_SHADER);
+			m_shaderManager.LinkShader(1);
+		}
 			break;
 		case GLFW_KEY_R:
 			m_transformFeedbackSwitch = true;
 			break;
 		case GLFW_KEY_L:
 			m_light.position = m_camera.position;
+			break;
+		case GLFW_KEY_P:
+			m_particlesOn = !m_particlesOn;
 			break;
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
@@ -184,6 +196,8 @@ void Renderer::Run()
 	i_generateNewFrameBuffer();
 	i_initShadow();
 
+	m_particlesOn = true;
+
 	//transform feedback
 	m_terrainCreator->initFeedback();
 
@@ -252,10 +266,13 @@ void Renderer::Run()
 		//glClearColor(0.f, 0.f, 0.f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		m_particleSystem->update(m_dt);
+		if(m_particlesOn)
+			m_particleSystem->update(m_dt);
 
 		GLuint query;
 		glGenQueries(1, &query);
+
+		glCullFace(GL_BACK);
 
 		if (m_transformFeedbackSwitch)
 		{
@@ -280,6 +297,8 @@ void Renderer::Run()
 		}
 		else
 		{
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_FRONT);
 			m_shaderManager.UseShader(2);
 			glViewport(0, 0, m_shadow.size, m_shadow.size);
 			glBindFramebuffer(GL_FRAMEBUFFER, m_shadow.depthFBO);
@@ -287,6 +306,7 @@ void Renderer::Run()
 			i_renderArray(m_terrainCreator->getFeedbackVAO(), m_terrainCreator->getVAOSize(), GL_TRIANGLES, 2);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, m_size.x, m_size.y); //reset viewport
+			glDisable(GL_CULL_FACE);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 			glClearColor(0.69f, 0.69f, 0.69f, 1.0f);
@@ -295,10 +315,13 @@ void Renderer::Run()
 			i_renderArray(m_terrainCreator->getFeedbackVAO(), m_terrainCreator->getVAOSize(), GL_TRIANGLES, 1);
 		}
 
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		m_particleSystem->draw(m_projection, m_view);
-		glDisable(GL_BLEND);
+		if (m_particlesOn)
+		{
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			m_particleSystem->draw(m_projection, m_view);
+			glDisable(GL_BLEND);
+		}
 
 		//render debug scene
 		/*if (m_debug)
@@ -372,6 +395,8 @@ GLFWwindow * Renderer::createWindow(int width, int height)
 	glViewport(0, 0, m_size.x, m_size.y);
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
 	glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSwapInterval(1);
@@ -493,12 +518,12 @@ void Renderer::i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_
 		glBindTexture(GL_TEXTURE_3D, m_terrainTexture);
 		glUniform1i(glGetUniformLocation(shaderId, "densityMap"), 1);
 
-		glHandleError(__FILE__, __LINE__);
+		glHandleError(__FUNCTION__, __LINE__);
 	}
 
 	GLfloat near_plane = 1.0f, far_plane = 100.0f;
 	glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
-	glm::mat4 lightView = glm::lookAt(glm::vec3(m_light.position.x, 10.0f, m_light.position.z),
+	glm::mat4 lightView = glm::lookAt(glm::vec3(m_light.position.x, m_light.position.y, m_light.position.z),
 		glm::vec3(0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 lightMatrix = lightProjection * lightView;
@@ -525,7 +550,7 @@ void Renderer::i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_
 	//glUniform3f(glGetUniformLocation(shaderId, "lightPos"), 0, 0, 0);
 	glUniform3f(glGetUniformLocation(shaderId, "cameraPos"), m_camera.position.x, m_camera.position.y, m_camera.position.z);
 
-	glHandleError(__FILE__, __LINE__);
+	glHandleError(__FUNCTION__, __LINE__);
 
 	glBindVertexArray(VAO);
 	glDrawArrays(glDrawMode, 0, arraySize);
@@ -576,7 +601,8 @@ void Renderer::i_initShadow()
 
 	glGenTextures(1, &m_shadow.depthTex);
 	glBindTexture(GL_TEXTURE_2D, m_shadow.depthTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_shadow.size, m_shadow.size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, m_shadow.size, m_shadow.size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glHandleError(__FUNCTION__, __LINE__);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -590,6 +616,7 @@ void Renderer::i_initShadow()
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glHandleError(__FUNCTION__, __LINE__);
 }
 
 //statics

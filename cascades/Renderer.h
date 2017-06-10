@@ -114,6 +114,7 @@ private:
 	ShaderManager m_shaderManager;
 	ParticleSystem* m_particleSystem;
 	Shadow m_shadow;
+	bool m_particlesOn;
 
 	void i_renderScene(Sceneobj* Scene, size_t size);
 	void i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_t shaderManagerId);

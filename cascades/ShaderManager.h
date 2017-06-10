@@ -10,6 +10,8 @@
 class ShaderManager
 {
 public:
+	//enum Shaders{ SHADER_SIMPLE = 0, SHADER_TERRAIN, SHADER_SHADOW };
+
 	ShaderManager();
 	~ShaderManager();
 

@@ -34,7 +34,7 @@ void main(int agrc, char* argv[])
 	//};
 	//int vSize = 12;
 
-	TerrainCreator::vec3i terrainSize(32, 64, 32);
+	TerrainCreator::vec3i terrainSize(64, 64, 64);
 
 	int t = time(NULL);
 	TerrainCreator terrain(terrainSize.x, terrainSize.y, terrainSize.z, 1337*3);
