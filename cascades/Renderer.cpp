@@ -6,7 +6,8 @@ Renderer::Renderer()
 	:m_debug(true),
 	m_densityThreshold(4.f),
 	m_transformFeedbackSwitch(true),
-	m_saveTransformFeedback(true)
+	m_saveTransformFeedback(true),
+	m_shadowMode(0)
 {
 	m_camera.nearPlane = 0.1f;
 	m_camera.farPlane = 1000.0f;
@@ -61,6 +62,15 @@ void Renderer::key_callback(int key, int action)
 			break;
 		case GLFW_KEY_P:
 			m_particlesOn = !m_particlesOn;
+			break;
+		case GLFW_KEY_1:
+			m_shadowMode = 0;
+			break;
+		case GLFW_KEY_2:
+			m_shadowMode = 1;
+			break;
+		case GLFW_KEY_3:
+			m_shadowMode = 2;
 			break;
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
@@ -549,6 +559,8 @@ void Renderer::i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_
 	//glUniform3fv(glGetUniformLocation(shaderId, "lightPos"), 3, glm::value_ptr(m_light.position));
 	//glUniform3f(glGetUniformLocation(shaderId, "lightPos"), 0, 0, 0);
 	glUniform3f(glGetUniformLocation(shaderId, "cameraPos"), m_camera.position.x, m_camera.position.y, m_camera.position.z);
+
+	glUniform1i(glGetUniformLocation(shaderId, "shadowMode"), m_shadowMode);
 
 	glHandleError(__FUNCTION__, __LINE__);
 

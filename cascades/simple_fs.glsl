@@ -47,6 +47,7 @@ uniform vec3 lightPos;
 uniform vec3 cameraPos;
 uniform sampler2D diffuseTexture;
 uniform sampler2D depthMap;
+uniform int shadowMode;
 
 float PenumbraSize(float zReceiver, float zBlocker) //Parallel plane estimation
 {
@@ -57,7 +58,7 @@ void FindBlocker(out float avgBlockerDepth, out float numBlockers, vec2 uv, floa
 {
 	//This uses similar triangles to compute what
 	//area of the shadow map we should search
-	float searchWidth = LIGHT_SIZE_UV * (zReceiver/* - NEAR_PLANE*/) / zReceiver;
+	float searchWidth = LIGHT_SIZE_UV /* * (zReceiver/* - NEAR_PLANE) / zReceiver*/;
 	float blockerSum = 0;
 	numBlockers = 0;
 	for( int i = 0; i < BLOCKER_SEARCH_NUM_SAMPLES; ++i )
@@ -117,13 +118,13 @@ float shadowCalc(vec4 fragPosLightSpace, vec3 norm)
 	if(projCoords.z > 1.0)
 		return 0.0;
 
-	bool pcss = true;
-	if(pcss)
+	//int shadowMode = 0;
+	if(shadowMode == 0)
 		return PCSS(projCoords);
-	else
-	{			
-		return PCF_Filter( projCoords.xy, projCoords.z, 0.001 );
-	}
+	else if(shadowMode == 1)
+		return PCF_Filter( projCoords.xy, projCoords.z, 0.002 );
+	else		
+		return (projCoords.z - 0.005 > texture(depthMap, projCoords.xy).r) ? 1.0 : 0.0;
 }
 
 void main()
