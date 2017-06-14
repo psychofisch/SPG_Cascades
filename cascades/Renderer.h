@@ -110,7 +110,8 @@ private:
 		m_edgeTable,
 		m_diffuseTexture,
 		m_framebuffer,
-		m_rbo;
+		m_rbo,
+		m_drawMode;
 	ShaderManager m_shaderManager;
 	ParticleSystem* m_particleSystem;
 	Shadow m_shadow;

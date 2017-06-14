@@ -73,8 +73,12 @@ void main(int agrc, char* argv[])
 	sM->LinkShader(terrainShader);
 
 	size_t mainShader = sM->createNewShader();
-	sM->attachShaderToProgram(mainShader, "simple_vs.glsl", GL_VERTEX_SHADER);
-	sM->attachShaderToProgram(mainShader, "simple_fs.glsl", GL_FRAGMENT_SHADER);
+	//sM->attachShaderToProgram(mainShader, "simple_vs.glsl", GL_VERTEX_SHADER);
+	//sM->attachShaderToProgram(mainShader, "simple_fs.glsl", GL_FRAGMENT_SHADER);
+	sM->attachShaderToProgram(mainShader, "tessellation_vs.glsl", GL_VERTEX_SHADER);
+	sM->attachShaderToProgram(mainShader, "tessellation_tcs.glsl", GL_TESS_CONTROL_SHADER);
+	sM->attachShaderToProgram(mainShader, "tessellation_tes.glsl", GL_TESS_EVALUATION_SHADER);
+	sM->attachShaderToProgram(mainShader, "tessellation_fs.glsl", GL_FRAGMENT_SHADER);
 	sM->LinkShader(mainShader);
 
 	size_t shadowShader = sM->createNewShader();

@@ -7,7 +7,8 @@ Renderer::Renderer()
 	m_densityThreshold(4.f),
 	m_transformFeedbackSwitch(true),
 	m_saveTransformFeedback(true),
-	m_shadowMode(0)
+	m_shadowMode(0),
+	m_drawMode(GL_PATCHES)
 {
 	m_camera.nearPlane = 0.1f;
 	m_camera.farPlane = 1000.0f;
@@ -49,8 +50,13 @@ void Renderer::key_callback(int key, int action)
 			m_particleSystem->compileShader();
 
 			m_shaderManager.clearShader(1);
-			m_shaderManager.attachShaderToProgram(1, "simple_vs.glsl", GL_VERTEX_SHADER);
-			m_shaderManager.attachShaderToProgram(1, "simple_fs.glsl", GL_FRAGMENT_SHADER);
+			/*m_shaderManager.attachShaderToProgram(1, "simple_vs.glsl", GL_VERTEX_SHADER);
+			m_shaderManager.attachShaderToProgram(1, "simple_tes.glsl", GL_TESS_EVALUATION_SHADER);
+			m_shaderManager.attachShaderToProgram(1, "simple_fs.glsl", GL_FRAGMENT_SHADER);*/
+			m_shaderManager.attachShaderToProgram(1, "tessellation_vs.glsl", GL_VERTEX_SHADER);
+			m_shaderManager.attachShaderToProgram(1, "tessellation_tcs.glsl", GL_TESS_CONTROL_SHADER);
+			m_shaderManager.attachShaderToProgram(1, "tessellation_tes.glsl", GL_TESS_EVALUATION_SHADER);
+			m_shaderManager.attachShaderToProgram(1, "tessellation_fs.glsl", GL_FRAGMENT_SHADER);
 			m_shaderManager.LinkShader(1);
 		}
 			break;
@@ -71,6 +77,12 @@ void Renderer::key_callback(int key, int action)
 			break;
 		case GLFW_KEY_3:
 			m_shadowMode = 2;
+			break;
+		case GLFW_KEY_M:
+			if (m_drawMode == GL_TRIANGLES)
+				m_drawMode = GL_LINES;
+			else
+				m_drawMode = GL_TRIANGLES;
 			break;
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
@@ -322,7 +334,8 @@ void Renderer::Run()
 			glClearColor(0.69f, 0.69f, 0.69f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			m_shaderManager.UseShader(1);
-			i_renderArray(m_terrainCreator->getFeedbackVAO(), m_terrainCreator->getVAOSize(), GL_TRIANGLES, 1);
+			//glPatchParameteri(GL_PATCH_VERTICES, 3);
+			i_renderArray(m_terrainCreator->getFeedbackVAO(), m_terrainCreator->getVAOSize(), m_drawMode, 1);
 		}
 
 		if (m_particlesOn)
@@ -568,7 +581,7 @@ void Renderer::i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_
 	glDrawArrays(glDrawMode, 0, arraySize);
 	glBindVertexArray(0);
 
-	glHandleError(__FILE__, __LINE__);
+	glHandleError(__FUNCTION__, __LINE__);
 }
 
 void Renderer::i_generateNewFrameBuffer()
