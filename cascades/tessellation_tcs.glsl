@@ -4,8 +4,8 @@ layout(vertices = 3) out;
 in vec3 vPosition[];
 out vec3 tcPosition[];
 
-const float TessLevelInner = 4.0f;
-const float TessLevelOuter = 4.0f;
+const float TessLevelInner = 1.0f;
+const float TessLevelOuter = 1.0f;
 
 #define ID gl_InvocationID
 

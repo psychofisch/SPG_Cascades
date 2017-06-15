@@ -6,5 +6,5 @@ in vec3 tePatchDistance;
 void main()
 {
 	//fragColor = vec4(1.0, 1.0 , 0.0, 1.0);
-	fragColor = vec4(tePatchDistance, 1.0);
+	fragColor = vec4(tePosition, 1.0);
 }

@@ -21,5 +21,5 @@ void main()
 	vDataOut.position = position;
 	vDataOut.normal = normal;
 	vDataOut.fragPosLightSpace = lightMatrix * vec4(position, 1.0);
-	gl_Position = projection * view * vec4(position.x, position.y, position.z, 1.0f);
+	gl_Position = projection * view * vec4(position, 1.0f);
 }
