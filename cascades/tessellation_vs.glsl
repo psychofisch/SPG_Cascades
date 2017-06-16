@@ -9,5 +9,5 @@ uniform mat4 view;
 
 void main()
 {
-	vPosition = (projection * view * vec4(position, 1.0)).xyz;
+	vPosition = position;
 }

@@ -334,7 +334,11 @@ void Renderer::Run()
 			glClearColor(0.69f, 0.69f, 0.69f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			m_shaderManager.UseShader(1);
-			//glPatchParameteri(GL_PATCH_VERTICES, 3);
+			glPatchParameteri(GL_PATCH_VERTICES, 3);
+			/*float tessLevel[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+			glPatchParameterfv(GL_PATCH_DEFAULT_INNER_LEVEL, tessLevel);
+			glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, tessLevel);*/
+			glHandleError(__FUNCTION__, __LINE__);
 			i_renderArray(m_terrainCreator->getFeedbackVAO(), m_terrainCreator->getVAOSize(), m_drawMode, 1);
 		}
 
