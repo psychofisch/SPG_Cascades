@@ -185,7 +185,8 @@ void TerrainCreator::initFeedback()
 
 void TerrainCreator::smoothFeedbackData(GLuint primitives)
 {
-	GLfloat* sameVertex = new GLfloat[3];
+	//GLfloat* sameVertex = new GLfloat[3];
+	glm::vec3 sameVertex;
 	size_t* affectedVertices = new size_t[primitives * 6];
 	size_t count = 0;
 	for (size_t i = 0; i < primitives * 18; i += 6)
@@ -210,16 +211,17 @@ void TerrainCreator::smoothFeedbackData(GLuint primitives)
 			}
 		}
 
-		sameVertex[0] /= count;
+		/*sameVertex[0] /= count;
 		sameVertex[1] /= count;
-		sameVertex[2] /= count;
+		sameVertex[2] /= count;*/
+		sameVertex = glm::normalize(sameVertex);
 
 		m_terrainFeedbackData[i + 3] = sameVertex[0];
 		m_terrainFeedbackData[i + 4] = sameVertex[1];
 		m_terrainFeedbackData[i + 5] = sameVertex[2];
 	}
 
-	delete[] sameVertex;
+	//delete[] sameVertex;
 	delete[] affectedVertices;
 }
 
