@@ -1,8 +1,17 @@
 #version 440 core
 layout(vertices = 3) out;
 
-in vec3 vPosition[];
-out vec3 tcPosition[];
+//in vec3 vPosition[];
+in vData{
+	vec3 position;
+	vec3 normal;
+} vDataIn[];
+
+//out vec3 tcPosition[];
+out tcData{
+	vec3 position;
+	vec3 normal;
+} tcDataOut[];
 
 #define ID gl_InvocationID
 
@@ -14,12 +23,18 @@ void main()
     float TessLevelOuter = 1.0f;
 	float tessLevel = 1.0f;
 	
-	tcPosition[ID] = vPosition[ID];
+	tcDataOut[ID].position = vDataIn[ID].position;
+	tcDataOut[ID].normal = vDataIn[ID].normal;
 	
-	float dist = length(cameraPos - vPosition[ID]);
-	dist = min(1.0, dist * 0.03);
+	float dist = length(cameraPos - vDataIn[ID].position);
+	dist = min(1.0, pow(dist * 0.05, 4));
 	
-	tessLevel = 1.0 + ((1.0 - dist) * 4.0);
+	tessLevel = 1.0 + ((1.0 - dist) * 8.0);
+	
+	// if(dist < 1.0)
+		// tessLevel = 8.0;
+	// else
+		// tessLevel = 1.0f;
 	
     if (ID == 0) {
         // gl_TessLevelInner[0] = TessLevelInner;

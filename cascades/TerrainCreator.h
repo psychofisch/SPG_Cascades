@@ -50,6 +50,7 @@ public:
 	GLuint getFeedbackVAO();
 	GLuint getVAOSize();
 	void initFeedback();
+	void smoothFeedbackData(GLuint primitives);
 
 	float* createTerrain();
 

@@ -334,7 +334,7 @@ void Renderer::Run()
 			glClearColor(0.69f, 0.69f, 0.69f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			m_shaderManager.UseShader(1);
-			glPatchParameteri(GL_PATCH_VERTICES, 3);
+			//glPatchParameteri(GL_PATCH_VERTICES, 3);
 			/*float tessLevel[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 			glPatchParameterfv(GL_PATCH_DEFAULT_INNER_LEVEL, tessLevel);
 			glPatchParameterfv(GL_PATCH_DEFAULT_OUTER_LEVEL, tessLevel);*/
@@ -375,6 +375,7 @@ void Renderer::Run()
 				GLuint primitives;
 				glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
 				glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_terrainCreator->getFeedbackSize(), m_terrainCreator->feedbackDataPtr());
+				m_terrainCreator->smoothFeedbackData(primitives);
 				m_terrainCreator->feedbackToVAO(primitives);
 				//m_transformFeedbackSwitch = false;
 				std::cout << primitives << " primitives captured\n";

@@ -183,6 +183,46 @@ void TerrainCreator::initFeedback()
 	std::cout << __FUNCTION__ << ": generating m_feedbackBuffer and m_terrainFeedbackData (" << m_feedbackDataSize/3 << " KByte)\n";
 }
 
+void TerrainCreator::smoothFeedbackData(GLuint primitives)
+{
+	GLfloat* sameVertex = new GLfloat[3];
+	size_t* affectedVertices = new size_t[primitives * 6];
+	size_t count = 0;
+	for (size_t i = 0; i < primitives * 18; i += 6)
+	{
+		affectedVertices[0] = i;
+		sameVertex[0] = m_terrainFeedbackData[i + 3];
+		sameVertex[1] = m_terrainFeedbackData[i + 4];
+		sameVertex[2] = m_terrainFeedbackData[i + 5];
+		count = 1;
+
+		for (size_t j = i; j <  primitives * 18; j += 6)
+		{
+			if (m_terrainFeedbackData[i] == m_terrainFeedbackData[j]
+				&& m_terrainFeedbackData[i+1] == m_terrainFeedbackData[j +1]
+				&& m_terrainFeedbackData[i+2] == m_terrainFeedbackData[j + 2])
+			{
+				affectedVertices[count] = j;
+				sameVertex[0] += m_terrainFeedbackData[j + 3];
+				sameVertex[1] += m_terrainFeedbackData[j + 4];
+				sameVertex[2] += m_terrainFeedbackData[j + 5];
+				count++;
+			}
+		}
+
+		sameVertex[0] /= count;
+		sameVertex[1] /= count;
+		sameVertex[2] /= count;
+
+		m_terrainFeedbackData[i + 3] = sameVertex[0];
+		m_terrainFeedbackData[i + 4] = sameVertex[1];
+		m_terrainFeedbackData[i + 5] = sameVertex[2];
+	}
+
+	delete[] sameVertex;
+	delete[] affectedVertices;
+}
+
 float* TerrainCreator::createTerrain()
 {
 	double diagonal = glm::sqrt(glm::pow(m_dimension.x, 2) + glm::pow(m_dimension.z, 2) + glm::pow(m_dimension.y, 2));
