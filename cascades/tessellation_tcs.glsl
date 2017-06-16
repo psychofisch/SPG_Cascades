@@ -30,7 +30,7 @@ void main()
 	dist = min(1.0, pow(dist * 0.05, 4));
 	
 	tessLevel = 1.0 + ((1.0 - dist) * 8.0);
-	
+	tessLevel = 1.0;
 	// if(dist < 1.0)
 		// tessLevel = 8.0;
 	// else

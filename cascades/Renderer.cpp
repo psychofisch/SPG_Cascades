@@ -56,7 +56,8 @@ void Renderer::key_callback(int key, int action)
 			m_shaderManager.attachShaderToProgram(1, "tessellation_vs.glsl", GL_VERTEX_SHADER);
 			m_shaderManager.attachShaderToProgram(1, "tessellation_tcs.glsl", GL_TESS_CONTROL_SHADER);
 			m_shaderManager.attachShaderToProgram(1, "tessellation_tes.glsl", GL_TESS_EVALUATION_SHADER);
-			m_shaderManager.attachShaderToProgram(1, "tessellation_fs.glsl", GL_FRAGMENT_SHADER);
+			//m_shaderManager.attachShaderToProgram(1, "tessellation_fs.glsl", GL_FRAGMENT_SHADER);
+			m_shaderManager.attachShaderToProgram(1, "simple_fs.glsl", GL_FRAGMENT_SHADER);
 			m_shaderManager.LinkShader(1);
 		}
 			break;
