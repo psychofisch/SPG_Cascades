@@ -109,6 +109,7 @@ private:
 		m_vertTable,
 		m_edgeTable,
 		m_diffuseTexture,
+		m_displacementTexture,
 		m_framebuffer,
 		m_rbo,
 		m_drawMode;

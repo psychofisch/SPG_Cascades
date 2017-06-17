@@ -215,6 +215,23 @@ void Renderer::Run()
 	glGenerateMipmap(GL_TEXTURE_2D);
 	SOIL_free_image_data(image);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	glHandleError(__FUNCTION__, __LINE__);
+
+	//displacementmap
+	glGenTextures(1, &m_displacementTexture);
+	glBindTexture(GL_TEXTURE_2D, m_displacementTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// Set texture filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Load, create texture and generate mipmaps
+	image = SOIL_load_image("soil_h.jpg", &width, &height, 0, SOIL_LOAD_RGB);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	SOIL_free_image_data(image);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glHandleError(__FUNCTION__, __LINE__);
 
 	i_generateNewFrameBuffer();
 	i_initShadow();
@@ -237,10 +254,10 @@ void Renderer::Run()
 
 		m_view = glm::mat4();
 		float pi = 3.1415f;
-		float moveSpeed = 5.f;
+		float moveSpeed = .25f;
 
 		if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-			moveSpeed *= 0.1f;
+			moveSpeed *= 2.f;
 
 		glm::vec3 forwardVec(0, 0, moveSpeed),
 			sideVec(moveSpeed, 0, 0);
@@ -376,7 +393,7 @@ void Renderer::Run()
 				GLuint primitives;
 				glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
 				glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_terrainCreator->getFeedbackSize(), m_terrainCreator->feedbackDataPtr());
-				m_terrainCreator->smoothFeedbackData(primitives);
+				//m_terrainCreator->smoothFeedbackData(primitives);
 				m_terrainCreator->feedbackToVAO(primitives);
 				//m_transformFeedbackSwitch = false;
 				std::cout << primitives << " primitives captured\n";
@@ -568,6 +585,10 @@ void Renderer::i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_diffuseTexture);
 	glUniform1i(glGetUniformLocation(shaderId, "diffuseTexture"), 1);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, m_displacementTexture);
+	glUniform1i(glGetUniformLocation(shaderId, "displaceTexture"), 3);
 
 	/*glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_1D, m_edgeTable);

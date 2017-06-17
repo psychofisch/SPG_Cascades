@@ -9,6 +9,8 @@ out vec4 fragColor;
 
 #define LIGHT_SIZE_UV 0.005//(LIGHT_WORLD_SIZE / LIGHT_FRUSTUM_WIDTH)
 
+const float normalFactor = 1.0;
+
 const vec2 poissonDisk[16] = vec2[](
 	vec2( -0.94201624, -0.39906216 ),
 	vec2( 0.94558609, -0.76890725 ),
@@ -47,7 +49,65 @@ uniform vec3 lightPos;
 uniform vec3 cameraPos;
 uniform sampler2D diffuseTexture;
 uniform sampler2D depthMap;
+uniform sampler2D displaceTexture;
 uniform int shadowMode;
+
+vec2 parallaxMapping(vec2 uvCoords, vec3 viewDir, float scale, float normalSign, int mode)
+{
+	//return uvCoords;
+	int initSteps = 8;
+	int refineSteps = 4;
+	
+	float layerDepth = 1.0 / initSteps;
+	float depthCurrent = 0.0;
+	vec2 shift;
+	
+	if(mode == 0)
+		shift = vec2(viewDir.x, -viewDir.y);
+	else if(/* (mode == 0 && normalSign < 0) ||  */
+	(mode == 1 && normalSign < 0) || (mode == 2 && normalSign > 0))
+		shift = vec2(viewDir.x, -viewDir.y);
+	else if((mode == 1 && normalSign > 0) || (mode == 2 && normalSign < 0))
+		shift = -vec2(viewDir.x, viewDir.y);
+	
+	if(mode == 1)
+	 shift *= -1;
+		
+	shift *= normalFactor * normalSign * 0.5;
+	vec2 uvCoordsDiff = shift / initSteps;
+	
+	vec2 uvCoordsCurrent = uvCoords;
+	float depthMapValue = texture(displaceTexture, uvCoordsCurrent * scale).r;
+	
+	//init search
+	for(int i = 0; i < initSteps; ++i)
+	{
+		if(depthMapValue <= depthCurrent)
+			break;
+	
+		uvCoordsCurrent -= uvCoordsDiff;
+		depthMapValue = texture(displaceTexture, uvCoordsCurrent * scale).r;
+		depthCurrent += layerDepth;
+	}
+	
+	//refinement
+	depthCurrent -= layerDepth;
+	uvCoordsCurrent += uvCoordsDiff;
+	depthMapValue = 1.0; //no need to sample again, because it IS higher than depthCurrent
+	layerDepth /= refineSteps;
+	uvCoordsDiff /= refineSteps;
+	for(int i = 0; i < refineSteps; ++i)
+	{
+		if(depthMapValue < depthCurrent)
+			break;
+	
+		uvCoordsCurrent -= uvCoordsDiff;
+		depthMapValue = texture(displaceTexture, uvCoordsCurrent * scale).r;
+		depthCurrent += layerDepth;
+	}
+	
+	return uvCoordsCurrent;
+}
 
 float PenumbraSize(float zReceiver, float zBlocker) //Parallel plane estimation
 {
@@ -132,6 +192,9 @@ void main()
 	vec3 lightColor = vec3(1.0);
 	vec3 normal = dataIn.normal;
 
+	vec3 lightDir = normalize(lightPos - dataIn.position);
+	vec3 viewDir = normalize(cameraPos - dataIn.position);
+	
 	//tri-planar
 	vec3 blend = abs(dataIn.normal);
 	blend = normalize(max(blend, 0.00001));
@@ -142,27 +205,29 @@ void main()
 	vec3 yColorCode = vec3(0, 1.0, 0);
 	vec3 zColorCode = vec3(0, 0, 1.0);
 	
-	float scale = 0.1;
+	float scale = 0.05;
 	float colorFactor = 1.0;
 	
-	vec2 xCoords = dataIn.position.zy;
+	//vec2 xCoords = dataIn.position.zy;
+	vec2 xCoords = parallaxMapping(dataIn.position.zy, viewDir, scale, sign(dataIn.normal.x), 0);
 	vec3 xColor = texture(diffuseTexture, xCoords * scale).rgb * max(xColorCode, colorFactor);
 	
-	vec2 yCoords = dataIn.position.zx;
+	//vec2 yCoords = dataIn.position.zx;
+	vec2 yCoords = parallaxMapping(dataIn.position.zx, viewDir, scale, sign(dataIn.normal.y), 1);
 	vec3 yColor = texture(diffuseTexture, yCoords * scale).rgb * max(yColorCode, colorFactor);
 	
-	vec2 zCoords = dataIn.position.xy;
+	//vec2 zCoords = dataIn.position.xy;
+	vec2 zCoords = parallaxMapping(dataIn.position.xy, viewDir, scale, sign(dataIn.normal.z), 2);
 	vec3 zColor = texture(diffuseTexture, zCoords * scale).rgb * max(zColorCode, colorFactor);
 	
 	vec3 color = xColor * blend.x * 1 + yColor * blend.y * 1 + zColor * blend.z * 1;
+	//vec3 normal = xNormal * blend.x * 1 + yNormal * blend.y * 1 + zNormal * blend.z * 1;
 	
 	// Ambient
 	float ambientStrength = 0.1;
 	vec3 ambient = ambientStrength * lightColor * color;
 	
 	// Diffuse 
-	vec3 lightDir = normalize(lightPos - dataIn.position);
-	vec3 viewDir = normalize(cameraPos - dataIn.position);
 	float diff = max(dot(lightDir, normal), 0.0);
 	//vec4 diffuse = dataIn.color * diff;
 	vec3 diffuse = diff * lightColor * color;
