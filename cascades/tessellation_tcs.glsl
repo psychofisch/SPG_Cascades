@@ -11,6 +11,7 @@ in vData{
 out tcData{
 	vec3 position;
 	vec3 normal;
+	float tessLevel;
 } tcDataOut[];
 
 #define ID gl_InvocationID
@@ -30,11 +31,13 @@ void main()
 	dist = min(1.0, pow(dist * 0.05, 4));
 	
 	tessLevel = 1.0 + ((1.0 - dist) * 8.0);
-	tessLevel = 1.0;
+	tcDataOut[ID].tessLevel = dist;
 	// if(dist < 1.0)
-		// tessLevel = 8.0;
+		// tessLevel = 16.0;
 	// else
 		// tessLevel = 1.0f;
+		
+	//tessLevel = 1.0;
 	
     if (ID == 0) {
         // gl_TessLevelInner[0] = TessLevelInner;

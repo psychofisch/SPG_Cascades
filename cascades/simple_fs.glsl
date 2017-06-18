@@ -52,7 +52,7 @@ uniform sampler2D depthMap;
 uniform sampler2D displaceTexture;
 uniform int shadowMode;
 
-vec2 parallaxMapping(vec2 uvCoords, vec3 viewDir, float scale, float normalSign, int mode)
+vec2 parallaxMapping(vec2 uvCoords, vec3 viewDir, float scale, vec3 normal, int mode)
 {
 	//return uvCoords;
 	int initSteps = 8;
@@ -60,6 +60,7 @@ vec2 parallaxMapping(vec2 uvCoords, vec3 viewDir, float scale, float normalSign,
 	
 	float layerDepth = 1.0 / initSteps;
 	float depthCurrent = 0.0;
+	float normalSign = sign(normal[mode]);
 	vec2 shift;
 	
 	if(mode == 0)
@@ -208,16 +209,16 @@ void main()
 	float scale = 0.05;
 	float colorFactor = 1.0;
 	
-	//vec2 xCoords = dataIn.position.zy;
-	vec2 xCoords = parallaxMapping(dataIn.position.zy, viewDir, scale, sign(dataIn.normal.x), 0);
+	vec2 xCoords = dataIn.position.zy;
+	// vec2 xCoords = parallaxMapping(dataIn.position.zy, viewDir, scale, dataIn.normal, 0);
 	vec3 xColor = texture(diffuseTexture, xCoords * scale).rgb * max(xColorCode, colorFactor);
 	
-	//vec2 yCoords = dataIn.position.zx;
-	vec2 yCoords = parallaxMapping(dataIn.position.zx, viewDir, scale, sign(dataIn.normal.y), 1);
+	vec2 yCoords = dataIn.position.zx;
+	// vec2 yCoords = parallaxMapping(dataIn.position.zx, viewDir, scale, dataIn.normal, 1);
 	vec3 yColor = texture(diffuseTexture, yCoords * scale).rgb * max(yColorCode, colorFactor);
 	
-	//vec2 zCoords = dataIn.position.xy;
-	vec2 zCoords = parallaxMapping(dataIn.position.xy, viewDir, scale, sign(dataIn.normal.z), 2);
+	vec2 zCoords = dataIn.position.xy;
+	// vec2 zCoords = parallaxMapping(dataIn.position.xy, viewDir, scale, dataIn.normal, 2);
 	vec3 zColor = texture(diffuseTexture, zCoords * scale).rgb * max(zColorCode, colorFactor);
 	
 	vec3 color = xColor * blend.x * 1 + yColor * blend.y * 1 + zColor * blend.z * 1;
