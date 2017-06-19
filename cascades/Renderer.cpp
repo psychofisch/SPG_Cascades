@@ -233,6 +233,22 @@ void Renderer::Run()
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glHandleError(__FUNCTION__, __LINE__);
 
+	//normalMap
+	glGenTextures(1, &m_normalMap);
+	glBindTexture(GL_TEXTURE_2D, m_normalMap);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// Set texture filtering
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Load, create texture and generate mipmaps
+	image = SOIL_load_image("soil_n.jpg", &width, &height, 0, SOIL_LOAD_RGB);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	SOIL_free_image_data(image);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glHandleError(__FUNCTION__, __LINE__);
+
 	i_generateNewFrameBuffer();
 	i_initShadow();
 
@@ -393,7 +409,7 @@ void Renderer::Run()
 				GLuint primitives;
 				glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
 				glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_terrainCreator->getFeedbackSize(), m_terrainCreator->feedbackDataPtr());
-				//m_terrainCreator->smoothFeedbackData(primitives);
+				m_terrainCreator->smoothFeedbackData(primitives);
 				m_terrainCreator->feedbackToVAO(primitives);
 				//m_transformFeedbackSwitch = false;
 				std::cout << primitives << " primitives captured\n";
@@ -589,6 +605,10 @@ void Renderer::i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, m_displacementTexture);
 	glUniform1i(glGetUniformLocation(shaderId, "displaceTexture"), 3);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, m_normalMap);
+	glUniform1i(glGetUniformLocation(shaderId, "normalMap"), 4);
 
 	/*glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_1D, m_edgeTable);

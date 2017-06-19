@@ -112,7 +112,8 @@ private:
 		m_displacementTexture,
 		m_framebuffer,
 		m_rbo,
-		m_drawMode;
+		m_drawMode,
+		m_normalMap;
 	ShaderManager m_shaderManager;
 	ParticleSystem* m_particleSystem;
 	Shadow m_shadow;

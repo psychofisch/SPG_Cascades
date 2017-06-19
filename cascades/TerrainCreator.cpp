@@ -192,9 +192,9 @@ void TerrainCreator::smoothFeedbackData(GLuint primitives)
 	for (size_t i = 0; i < primitives * 18; i += 6)
 	{
 		affectedVertices[0] = i;
-		sameVertex[0] = m_terrainFeedbackData[i + 3];
-		sameVertex[1] = m_terrainFeedbackData[i + 4];
-		sameVertex[2] = m_terrainFeedbackData[i + 5];
+		sameVertex.x = m_terrainFeedbackData[i + 3];
+		sameVertex.y = m_terrainFeedbackData[i + 4];
+		sameVertex.z = m_terrainFeedbackData[i + 5];
 		count = 1;
 
 		for (size_t j = i; j <  primitives * 18; j += 6)
@@ -204,9 +204,9 @@ void TerrainCreator::smoothFeedbackData(GLuint primitives)
 				&& m_terrainFeedbackData[i+2] == m_terrainFeedbackData[j + 2])
 			{
 				affectedVertices[count] = j;
-				sameVertex[0] += m_terrainFeedbackData[j + 3];
-				sameVertex[1] += m_terrainFeedbackData[j + 4];
-				sameVertex[2] += m_terrainFeedbackData[j + 5];
+				sameVertex.x += m_terrainFeedbackData[j + 3];
+				sameVertex.y += m_terrainFeedbackData[j + 4];
+				sameVertex.z += m_terrainFeedbackData[j + 5];
 				count++;
 			}
 		}

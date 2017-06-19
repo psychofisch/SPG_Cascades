@@ -7,8 +7,6 @@ uniform mat4 view;
 uniform mat4 lightMatrix;
 
 out vData{
-	mat4 p;
-	mat4 v;
 	vec3 position;
 	vec3 normal;
 	vec4 fragPosLightSpace;
@@ -16,8 +14,6 @@ out vData{
 
 void main()
 {
-	vDataOut.p = projection;
-	vDataOut.v = view;
 	vDataOut.position = position;
 	vDataOut.normal = normal;
 	vDataOut.fragPosLightSpace = lightMatrix * vec4(position, 1.0);

@@ -38,8 +38,6 @@ const vec2 poissonDisk[16] = vec2[](
 // } dataIn;
 
 in vData{
-	mat4 p;
-	mat4 v;
 	vec3 position;
 	vec3 normal;
 	vec4 fragPosLightSpace;
@@ -49,6 +47,7 @@ uniform vec3 lightPos;
 uniform vec3 cameraPos;
 uniform sampler2D diffuseTexture;
 uniform sampler2D depthMap;
+uniform sampler2D normalMap;
 uniform sampler2D displaceTexture;
 uniform int shadowMode;
 
@@ -188,11 +187,32 @@ float shadowCalc(vec4 fragPosLightSpace, vec3 norm)
 		return (projCoords.z - 0.005 > texture(depthMap, projCoords.xy).r) ? 1.0 : 0.0;
 }
 
+vec3 calcTangents(vec3 vert[3], vec2 uv[3])
+{
+	vec3 t;
+
+	vec3 edge1 = vert[1] - vert[0];
+	vec3 edge2 = vert[2] - vert[0];
+	vec2 deltaUV1 = uv[1] - uv[0];
+	vec2 deltaUV2 = uv[2] - uv[0];
+
+	float n = deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y;
+	float f = 1.f;
+	if(abs(n) > 0.001f)
+		f = 1.0f / n;
+
+	t.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+	t.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+	t.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+	
+	return normalize(t);
+}
+
 void main()
 {
 	vec3 lightColor = vec3(1.0);
 	vec3 normal = dataIn.normal;
-
+	
 	vec3 lightDir = normalize(lightPos - dataIn.position);
 	vec3 viewDir = normalize(cameraPos - dataIn.position);
 	
