@@ -44,7 +44,13 @@ void main()
     tessNorm += gl_TessCoord.z * tcDataIn[2].normal;
 	tessNorm = normalize(tessNorm);
 	
-	if(gl_TessLevelOuter[0] > 1.0)
+	bool test = true;
+	if(gl_TessCoord.x < 0.001 || gl_TessCoord.x > 0.999
+		|| gl_TessCoord.y < 0.001 || gl_TessCoord.y > 0.999
+		|| gl_TessCoord.z < 0.001 || gl_TessCoord.z > 0.999)
+		test = false;
+	
+	if(test && gl_TessLevelOuter[0] > 1.0)
 	{
 		//tri-planar
 		vec3 blend = abs(tessNorm);
@@ -55,19 +61,15 @@ void main()
 		float scale = 0.05;
 		
 		vec2 xCoords = tessPos.zy;
-		// vec2 xCoords = parallaxMapping(dataIn.position.zy, viewDir, scale, dataIn.normal, 0);
 		vec3 xColor = texture(displaceTexture, xCoords * scale).rgb;
 		
 		vec2 yCoords = tessPos.zx;
-		// vec2 yCoords = parallaxMapping(dataIn.position.zx, viewDir, scale, dataIn.normal, 1);
 		vec3 yColor = texture(displaceTexture, yCoords * scale).rgb;
 		
 		vec2 zCoords = tessPos.xy;
-		// vec2 zCoords = parallaxMapping(dataIn.position.xy, viewDir, scale, dataIn.normal, 2);
 		vec3 zColor = texture(displaceTexture, zCoords * scale).rgb;
 		
 		vec3 color = xColor * blend.x * 1 + yColor * blend.y * 1 + zColor * blend.z * 1;
-		//vec3 normal = xNormal * blend.x * 1 + yNormal * blend.y * 1 + zNormal * blend.z * 1;
 		tessPos += -color * 0.5 * tessNorm * (1.0 - tcDataIn[0].tessLevel);
 	}
 	
