@@ -88,7 +88,7 @@ void main()
 		vec2 xCoords = tessPos.zy;
 		vec3 xColor = texture(displaceTexture, xCoords * scale).rgb;
 		
-		vec2 yCoords = tessPos.zx;
+		vec2 yCoords = tessPos.xz;
 		vec3 yColor = texture(displaceTexture, yCoords * scale).rgb;
 		
 		vec2 zCoords = tessPos.xy;
@@ -97,7 +97,7 @@ void main()
 		vec3 color = xColor * blend.x * 1 + yColor * blend.y * 1 + zColor * blend.z * 1;
 		
 		if(displaceMode == 0)
-			tessPos += -color * 1.0 * tessNorm * (1.0 - tcDataIn[0].tessLevel);
+			tessPos += -color * 0.3 * tessNorm * (1.0 - tcDataIn[0].tessLevel);
 		else if(displaceMode == 1)
 		{
 			vec3 triangle[] = vec3[]( tcDataIn[0].position, tcDataIn[1].position, tcDataIn[2].position );

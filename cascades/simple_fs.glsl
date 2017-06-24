@@ -271,7 +271,7 @@ void main()
 	float colorFactor = 1.0;
 	
 	vec2 xCoords = dataIn.position.zy;
-	vec2 yCoords = dataIn.position.zx;
+	vec2 yCoords = dataIn.position.xz;
 	vec2 zCoords = dataIn.position.xy;
 	
 	if(displaceMode == 1)
