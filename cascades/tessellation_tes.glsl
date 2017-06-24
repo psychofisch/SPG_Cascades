@@ -101,7 +101,7 @@ void main()
 		else if(displaceMode == 1)
 		{
 			vec3 triangle[] = vec3[]( tcDataIn[0].position, tcDataIn[1].position, tcDataIn[2].position );
-			vec2 uvCoords[] = vec2[]( tcDataIn[0].position.zx, tcDataIn[1].position.zx, tcDataIn[2].position.zx );
+			vec2 uvCoords[] = vec2[]( tcDataIn[0].position.xz, tcDataIn[1].position.xz, tcDataIn[2].position.xz );
 			vec3 tangent = calcTangents(triangle, uvCoords);
 			vec3 T = normalize(tangent);
 			vec3 N = normalize(tessNorm);

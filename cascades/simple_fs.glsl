@@ -9,7 +9,7 @@ out vec4 fragColor;
 
 #define LIGHT_SIZE_UV 0.005//(LIGHT_WORLD_SIZE / LIGHT_FRUSTUM_WIDTH)
 
-const float normalFactor = 1.0;
+const float normalFactor = 0.85;
 
 const vec2 poissonDisk[16] = vec2[](
 	vec2( -0.94201624, -0.39906216 ),
