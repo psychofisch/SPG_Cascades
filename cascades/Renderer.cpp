@@ -8,7 +8,8 @@ Renderer::Renderer()
 	m_transformFeedbackSwitch(true),
 	m_saveTransformFeedback(true),
 	m_shadowMode(0),
-	m_drawMode(GL_PATCHES)
+	m_drawMode(GL_PATCHES),
+	m_displaceMode(0)
 {
 	m_camera.nearPlane = 0.1f;
 	m_camera.farPlane = 1000.0f;
@@ -78,6 +79,15 @@ void Renderer::key_callback(int key, int action)
 			break;
 		case GLFW_KEY_3:
 			m_shadowMode = 2;
+			break;
+		case GLFW_KEY_4:
+			m_displaceMode = 0;
+			break;
+		case GLFW_KEY_5:
+			m_displaceMode = 1;
+			break;
+		case GLFW_KEY_6:
+			m_displaceMode = 2;
 			break;
 		case GLFW_KEY_M:
 			if (m_drawMode == GL_TRIANGLES)
@@ -621,6 +631,7 @@ void Renderer::i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_
 	glUniform3f(glGetUniformLocation(shaderId, "cameraPos"), m_camera.position.x, m_camera.position.y, m_camera.position.z);
 
 	glUniform1i(glGetUniformLocation(shaderId, "shadowMode"), m_shadowMode);
+	glUniform1i(glGetUniformLocation(shaderId, "displaceMode"), m_displaceMode);
 
 	glHandleError(__FUNCTION__, __LINE__);
 

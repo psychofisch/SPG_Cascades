@@ -43,6 +43,8 @@ in vData{
 	vec4 fragPosLightSpace;
 } dataIn;
 
+in mat3 TBN;
+
 uniform vec3 lightPos;
 uniform vec3 cameraPos;
 uniform sampler2D diffuseTexture;
@@ -50,6 +52,7 @@ uniform sampler2D depthMap;
 uniform sampler2D normalMap;
 uniform sampler2D displaceTexture;
 uniform int shadowMode;
+uniform int displaceMode;
 
 vec2 parallaxMapping(vec2 uvCoords, vec3 viewDir, float scale, vec3 normal, int mode)
 {
@@ -187,25 +190,63 @@ float shadowCalc(vec4 fragPosLightSpace, vec3 norm)
 		return (projCoords.z - 0.005 > texture(depthMap, projCoords.xy).r) ? 1.0 : 0.0;
 }
 
-vec3 calcTangents(vec3 vert[3], vec2 uv[3])
+vec2 parallaxMapping(vec2 uvCoords, vec3 viewDir, float scale, float normalSign, int mode)
 {
-	vec3 t;
-
-	vec3 edge1 = vert[1] - vert[0];
-	vec3 edge2 = vert[2] - vert[0];
-	vec2 deltaUV1 = uv[1] - uv[0];
-	vec2 deltaUV2 = uv[2] - uv[0];
-
-	float n = deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y;
-	float f = 1.f;
-	if(abs(n) > 0.001f)
-		f = 1.0f / n;
-
-	t.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
-	t.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
-	t.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+	//return uvCoords;
+	ivec2 displacementSteps = ivec2(8, 4);
+	int initSteps = displacementSteps.x;
+	int refineSteps = displacementSteps.y;
 	
-	return normalize(t);
+	float layerDepth = 1.0 / initSteps;
+	float depthCurrent = 0.0;
+	vec2 shift;
+	
+	if(mode == 0)
+		shift = vec2(viewDir.x, -viewDir.y);
+	else if(/* (mode == 0 && normalSign < 0) ||  */
+	(mode == 1 && normalSign < 0) || (mode == 2 && normalSign > 0))
+		shift = vec2(viewDir.x, -viewDir.y);
+	else if((mode == 1 && normalSign > 0) || (mode == 2 && normalSign < 0))
+		shift = -vec2(viewDir.x, viewDir.y);
+	
+	if(mode == 1)
+	 shift *= -1;
+		
+	shift *= normalFactor * normalSign * 0.5;
+	
+	vec2 uvCoordsDiff = shift / initSteps;
+	
+	vec2 uvCoordsCurrent = uvCoords;
+	float depthMapValue = texture(displaceTexture, uvCoordsCurrent * scale).r;
+	
+	//init search
+	for(int i = 0; i < initSteps; ++i)
+	{
+		if(depthMapValue <= depthCurrent)
+			break;
+	
+		uvCoordsCurrent -= uvCoordsDiff;
+		depthMapValue = texture(displaceTexture, uvCoordsCurrent * scale).r;
+		depthCurrent += layerDepth;
+	}
+	
+	//refinement
+	depthCurrent -= layerDepth;
+	uvCoordsCurrent += uvCoordsDiff;
+	depthMapValue = 1.0; //no need to sample again, because it IS higher than depthCurrent
+	layerDepth /= refineSteps;
+	uvCoordsDiff /= refineSteps;
+	for(int i = 0; i < refineSteps; ++i)
+	{
+		if(depthMapValue < depthCurrent)
+			break;
+	
+		uvCoordsCurrent -= uvCoordsDiff;
+		depthMapValue = texture(displaceTexture, uvCoordsCurrent * scale).r;
+		depthCurrent += layerDepth;
+	}
+	
+	return uvCoordsCurrent;
 }
 
 void main()
@@ -230,15 +271,18 @@ void main()
 	float colorFactor = 1.0;
 	
 	vec2 xCoords = dataIn.position.zy;
-	// vec2 xCoords = parallaxMapping(dataIn.position.zy, viewDir, scale, dataIn.normal, 0);
-	vec3 xColor = texture(diffuseTexture, xCoords * scale).rgb * max(xColorCode, colorFactor);
-	
 	vec2 yCoords = dataIn.position.zx;
-	// vec2 yCoords = parallaxMapping(dataIn.position.zx, viewDir, scale, dataIn.normal, 1);
-	vec3 yColor = texture(diffuseTexture, yCoords * scale).rgb * max(yColorCode, colorFactor);
-	
 	vec2 zCoords = dataIn.position.xy;
-	// vec2 zCoords = parallaxMapping(dataIn.position.xy, viewDir, scale, dataIn.normal, 2);
+	
+	if(displaceMode == 1)
+	{
+		xCoords = parallaxMapping(dataIn.position.zy, TBN * viewDir, scale, sign(normal.x), 0);
+		yCoords = parallaxMapping(dataIn.position.xz, TBN * viewDir, scale, sign(normal.y), 1);
+		zCoords = parallaxMapping(dataIn.position.xy, TBN * viewDir, scale, sign(normal.z), 2);
+	}
+	
+	vec3 xColor = texture(diffuseTexture, xCoords * scale).rgb * max(xColorCode, colorFactor);
+	vec3 yColor = texture(diffuseTexture, yCoords * scale).rgb * max(yColorCode, colorFactor);
 	vec3 zColor = texture(diffuseTexture, zCoords * scale).rgb * max(zColorCode, colorFactor);
 	
 	vec3 color = xColor * blend.x * 1 + yColor * blend.y * 1 + zColor * blend.z * 1;

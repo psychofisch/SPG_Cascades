@@ -118,7 +118,8 @@ private:
 	ParticleSystem* m_particleSystem;
 	Shadow m_shadow;
 	bool m_particlesOn;
-	int m_shadowMode;
+	int m_shadowMode,//0 - PCSS, 1 - PCF, 2 - Hard Shadows
+		m_displaceMode;//0 - tess, 1 - mapping, 2 - off
 
 	void i_renderScene(Sceneobj* Scene, size_t size);
 	void i_renderArray(GLuint VAO, GLuint arraySize, int glDrawMode, size_t shaderManagerId);

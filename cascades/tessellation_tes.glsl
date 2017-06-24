@@ -14,6 +14,8 @@ out vData{
 	vec4 fragPosLightSpace;
 } dataOut;
 
+out mat3 TBN;
+
 // out vec3 tePosition;
 // out vec3 teNormal;
 // out vec3 tePatchDistance;
@@ -23,6 +25,7 @@ uniform mat4 view;
 uniform mat4 lightMatrix;
 uniform sampler2D displaceTexture;
 uniform sampler2D normalMap;
+uniform int displaceMode;
 
 vec3 calcTangents(vec3 vert[3], vec2 uv[3])
 {
@@ -72,7 +75,7 @@ void main()
 		// || gl_TessCoord.z == 0 || gl_TessCoord.z == 1.0)
 		// test = false;
 	
-	if(test && gl_TessLevelOuter[0] > 1.0)
+	if(displaceMode != 2 && gl_TessLevelOuter[0] > 1.0)
 	{
 		//tri-planar
 		vec3 blend = abs(tessNorm);
@@ -92,7 +95,19 @@ void main()
 		vec3 zColor = texture(displaceTexture, zCoords * scale).rgb;
 		
 		vec3 color = xColor * blend.x * 1 + yColor * blend.y * 1 + zColor * blend.z * 1;
-		tessPos += -color * 1.0 * tessNorm * (1.0 - tcDataIn[0].tessLevel);
+		
+		if(displaceMode == 0)
+			tessPos += -color * 1.0 * tessNorm * (1.0 - tcDataIn[0].tessLevel);
+		else if(displaceMode == 1)
+		{
+			vec3 triangle[] = vec3[]( tcDataIn[0].position, tcDataIn[1].position, tcDataIn[2].position );
+			vec2 uvCoords[] = vec2[]( tcDataIn[0].position.zx, tcDataIn[1].position.zx, tcDataIn[2].position.zx );
+			vec3 tangent = calcTangents(triangle, uvCoords);
+			vec3 T = normalize(tangent);
+			vec3 N = normalize(tessNorm);
+			vec3 B = cross(T, N);
+			TBN = mat3(T, B, N);
+		}
 	}
 	
 	dataOut.normal = normalize(tessNorm);
