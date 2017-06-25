@@ -16,8 +16,8 @@ in Data{
 
 void main()
 {
-	if(gsDataIn.age > 1.0f)
-		discard;
+	// if(gsDataIn.age >= 1.0f)
+		// discard;
 	
 	vec4 smoke = texture(smokeTexture, gsDataIn.uv).rgba;
 	if(smoke.a < 0.25)
@@ -34,5 +34,6 @@ void main()
 	
 	if(age > 0.8)
 		fragColor.a -= (age - 0.8) * 5.0;
-	//fragColor = vec4(color, 0.9f);
+	
+	//fragColor = vec4(1.0f, 0, 0, 1.f);
 }

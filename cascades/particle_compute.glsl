@@ -44,7 +44,7 @@ void main()
 	{
 		if(activeEmitters > 0)
 		{
-			if(r < 0.00005)
+			if(r < 0.00003)
 			{
 				//int index = int(floor(r * activeEmitters)) * 6;
 				uint index = (gl_VertexID%activeEmitters) * 6;

@@ -36,7 +36,7 @@ void main(int agrc, char* argv[])
 
 	TerrainCreator::vec3i terrainSize(64, 64, 64);
 
-	int t = time(NULL);
+	int t = int(time(NULL));
 	TerrainCreator terrain(terrainSize.x, terrainSize.y, terrainSize.z, 1337*3);
 	terrain.createTerrain();
 

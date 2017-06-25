@@ -285,6 +285,22 @@ void main()
 	vec3 yColor = texture(diffuseTexture, yCoords * scale).rgb * max(yColorCode, colorFactor);
 	vec3 zColor = texture(diffuseTexture, zCoords * scale).rgb * max(zColorCode, colorFactor);
 	
+	if(blend.x >= blend.y && blend.x >= blend.z)
+	{
+		blend.x = 1.0;
+		blend.y = blend.z = 0.0;
+	}
+	else if(blend.y >= blend.x && blend.y >= blend.z)
+	{
+		blend.y = 1.0;
+		blend.x = blend.z = 0.0;
+	}
+	else if(blend.z >= blend.x && blend.z >= blend.x)
+	{
+		blend.z = 1.0;
+		blend.x = blend.y = 0.0;
+	}
+	
 	vec3 color = xColor * blend.x * 1 + yColor * blend.y * 1 + zColor * blend.z * 1;
 	//vec3 normal = xNormal * blend.x * 1 + yNormal * blend.y * 1 + zNormal * blend.z * 1;
 	

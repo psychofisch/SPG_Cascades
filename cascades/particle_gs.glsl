@@ -41,7 +41,10 @@ void build_quad(vec4 position, float size)
 
 void main()
 {
-	gsDataOut.age = vDataIn[0].age;
+	if(vDataIn[0].age >= 1.0)
+		return;
+
+	gsDataOut.age = vDataIn[0].age;	
 	gsDataOut.velocity = vDataIn[0].pVelocity;
 	
 	float size = 1.0;

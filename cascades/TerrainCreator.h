@@ -38,7 +38,7 @@ public:
 
 	float* getTerrainData();
 	float getTerrainDataAt(vec3i position);
-	int getNumberOfVertices(bool cube = false);
+	size_t getNumberOfVertices(bool cube = false);
 	void getVertices(GLfloat* verticesOut, bool cube = false);
 	GLfloat* getCubeVertices();
 	vec3i getDimensions();

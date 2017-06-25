@@ -90,10 +90,6 @@ void Renderer::key_callback(int key, int action)
 			m_displaceMode = 2;
 			break;
 		case GLFW_KEY_M:
-			if (m_drawMode == GL_TRIANGLES)
-				m_drawMode = GL_LINES;
-			else
-				m_drawMode = GL_TRIANGLES;
 			break;
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(m_window, GL_TRUE);
@@ -122,8 +118,8 @@ void Renderer::mouse_callback(double xpos, double ypos)
 	glm::quat yaw = glm::quat(glm::vec3(diff.y * m_dt * sens, 0.0f, 0.0f));
 	glm::quat pitch = glm::quat(glm::vec3(0.0f, diff.x * m_dt * sens, 0.0f));
 	m_camera.rotation = glm::normalize(yaw * m_camera.rotation * pitch);
-	m_mouse.x = xpos;
-	m_mouse.y = ypos;
+	m_mouse.x = float(xpos);
+	m_mouse.y = float(ypos);
 }
 
 void Renderer::mouse_button_callback(int button, int action)
@@ -132,7 +128,7 @@ void Renderer::mouse_button_callback(int button, int action)
 	{
 		switch (button)
 		{
-		case GLFW_MOUSE_BUTTON_LEFT:
+		case GLFW_MOUSE_BUTTON_RIGHT:
 			std::cout << "click!\n";
 
 			std::cout << "Camera Position: " << m_camera.position.x << "|" << m_camera.position.y << "|" << m_camera.position.z << std::endl;
@@ -146,9 +142,9 @@ void Renderer::mouse_button_callback(int button, int action)
 			int closestT = -1;
 			float closest = HUGE_VALF;
 			glm::vec3 triangle[3];
-			for (int i = 0; i < dataSize; i += 18)
+			for (size_t i = 0; i < dataSize; i += 18)
 			{
-				for (int j = 0; j < 3; ++j)
+				for (size_t j = 0; j < 3; ++j)
 				{
 					triangle[j].x = data[(j * 6) + i];
 					triangle[j].y = data[(j * 6) + i + 1];

@@ -29,14 +29,14 @@ float TerrainCreator::getTerrainDataAt(vec3i p)
 	return m_terrain[p.x + p.y * m_dimension.x + p.z * m_dimension.x * m_dimension.y];
 }
 
-int TerrainCreator::getNumberOfVertices(bool cube)
+size_t TerrainCreator::getNumberOfVertices(bool cube)
 {
 	if (cube)
 	{
 		return m_size;
 	}
 
-	int vSize = 0;
+	size_t vSize = 0;
 	for (uint i = 0; i < m_size; ++i)
 	{
 		if (m_terrain[i] == 1.0f)
