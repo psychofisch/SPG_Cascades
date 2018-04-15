@@ -2,7 +2,7 @@
 This project was an assignment for my university. It does **NOT** contain usable code and is only a proof of concept!
 
 ## Content
-This demo has a lot of different graphic-related stuff in it. Some are in C++ but the most are in GLSL.
+This demo is inspired by the "Cascades" demo by Nvidia and has a lot of different graphic-related stuff in it. Some parts are in C++ but the most are in GLSL.
 - marching cubes
 - transform feedback
 - simple shadow mapping(hard, soft and pcss)
